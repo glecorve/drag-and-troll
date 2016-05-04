@@ -89,8 +89,8 @@ public abstract class Personnage extends Entite {
 		int xInit = getPosition().getAbscisse();
 		int yInit = getPosition().getOrdonnee();
 		int dep = deplacementMax - deplacementActuel;
-		for (int x = xInit - dep; x <= xInit + dep; x++) {
-			for (int y = yInit - dep; y <= yInit + dep; y++) {
+		for (int x = Math.max(0, xInit - dep); x <= Math.min(plateau.length-1, xInit + dep); x++) {
+			for (int y = Math.max(0, yInit - dep); y <= Math.min(plateau.length-1, yInit + dep); y++) {
 				if ((x != xInit || y != yInit)
 						&& (Math.abs(x - xInit)+Math.abs(y - yInit)) <= dep) {
 					if (!detecteCollision(plateau[x][y])) {

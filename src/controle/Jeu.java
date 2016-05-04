@@ -762,6 +762,7 @@ public class Jeu {
 		else if (personnageSelectionne instanceof Dragon) {
 			deplacerDragon(newC);
 		}
+		plateau[newC.getAbscisse()][newC.getOrdonnee()] = newC;
 	}
 	
 	
