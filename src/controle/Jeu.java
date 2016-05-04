@@ -182,14 +182,6 @@ public class Jeu {
 	 * @param aCopier Instance to be copied 
 	 */
 	public Jeu(Jeu aCopier) {
-		// The table will be a table of table size of the argument
-		this.plateau = aCopier.plateau.clone();
-		for (int i = 0; i < taillePlateau; ++i) {
-			for (int j = 0; j < taillePlateau; ++j) {
-				// We create each Case in the table
-				this.plateau[i][j] = (Case) aCopier.plateau[i][j].clone();
-			}
-		}
 		
 		this.images = aCopier.images;
 		listeEntite = new HashSet<Entite>();
@@ -197,25 +189,25 @@ public class Jeu {
 			listeEntite.add((Entite) e.clone());
 		}
 		
-		tabRemoveEntite = new HashSet<Entite>();
-		for (Entite e : aCopier.tabRemoveEntite) {
-			tabRemoveEntite.add((Entite) e.clone());
+		// The table will be a table of table size of the argument
+		this.plateau = new Case[taillePlateau][taillePlateau];
+		this.tabRemoveEntite = new HashSet<Entite>();
+		this.dragonList = new HashSet<Dragon>();
+		this.trollList = new ArrayList<Troll>();
+		this.deletedPlayers = new ArrayList<Troll>(aCopier.deletedPlayers);
+		for (int i = 0; i < taillePlateau; ++i) {
+			for (int j = 0; j < taillePlateau; ++j) {
+				// We create each Case in the table
+				this.plateau[i][j] = (Case) aCopier.plateau[i][j].clone();
+				for (Entite e : this.plateau[i][j].getEntites()) {
+					if (aCopier.tabRemoveEntite.contains(e)) { tabRemoveEntite.add(e); }
+					if (e instanceof Dragon && aCopier.dragonList.contains(e)) { dragonList.add((Dragon) e); }
+					if (e instanceof Troll && aCopier.trollList.contains(e)) { trollList.add((Troll) e); }
+					if (e instanceof Troll && aCopier.deletedPlayers.contains(e)) { deletedPlayers.add((Troll) e); }
+				}
+			}
 		}
 		
-		dragonList = new HashSet<Dragon>();
-		for (Dragon d : aCopier.dragonList) {
-			dragonList.add((Dragon) d.clone());
-		}
-		
-		trollList = new ArrayList<Troll>();
-		for (Troll t : aCopier.trollList) {
-			trollList.add((Troll) t.clone());
-		}
-		
-		deletedPlayers = new ArrayList<Troll>(aCopier.deletedPlayers);
-		for (Troll t : aCopier.deletedPlayers) {
-			deletedPlayers.add((Troll) t.clone()); 
-		}
 		maison = plateau[aCopier.maison.getAbscisse()][aCopier.maison.getOrdonnee()];
 		scoreMax = aCopier.scoreMax;
 		
@@ -718,6 +710,10 @@ public class Jeu {
 	
 	public Joueur getJoueurCourant() {
 		return joueurs.get(indiceJoueurCourant);
+	}
+	
+	public List<Joueur> getJoueurs() {
+		return joueurs;
 	}
 
 	/**

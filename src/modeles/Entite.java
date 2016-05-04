@@ -43,7 +43,6 @@ public abstract class Entite {
 	protected void copy(Entite e) {
 		this.id = new String(e.id);
 		this.position = (Case) e.position.clone();
-//		this.position = e.position; // No clone
 		this.myPicture = e.myPicture;
 	}
 	

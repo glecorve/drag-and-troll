@@ -44,19 +44,28 @@ public class Case {
 		this.entites = new ArrayList<Entite>();
 	}
 	
+	// Synchronized because of beingCloned
 	public synchronized Object clone() {
 		if (!beingCloned) {
 			Case c = new Case(this.abscisse, this.ordonnee);
-			this.beingCloned = true;
+			c.beingCloned = true;
 			for (Entite e : this.entites) {
-				c.addEntite((Entite) e.clone());
+				c.addEntite(e);
 			}
-			this.beingCloned = false;
+			c.beingCloned = false;
 			return c;
 		}
 		else {
 			return this;
 		}
+	}
+	
+	private Object clone_no_recursion() {
+		Case c = new Case(this.abscisse, this.ordonnee);
+		for (Entite e : this.entites) {
+			c.addEntite(e);
+		}
+		return c;
 	}
 	
 	/**
