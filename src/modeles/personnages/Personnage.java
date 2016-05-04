@@ -1,5 +1,8 @@
 package modeles.personnages;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import modeles.Case;
 import modeles.Entite;
 import modeles.obstacles.Obstacle;
@@ -79,6 +82,24 @@ public abstract class Personnage extends Entite {
 			return (!c.getEntites().isEmpty() && c.getFirstEntite() instanceof Obstacle );
 		}
 		
+	}
+	
+	public List<Case> listerCasesAtteignables(Case[][] plateau) {
+		List<Case> casesAtteignables = new ArrayList<Case>();
+		int xInit = getPosition().getAbscisse();
+		int yInit = getPosition().getOrdonnee();
+		int dep = deplacementMax - deplacementActuel;
+		for (int x = xInit - dep; x <= xInit + dep; x++) {
+			for (int y = yInit - dep; y <= yInit + dep; y++) {
+				if ((x != xInit || y != yInit)
+						&& (Math.abs(x - xInit)+Math.abs(y - yInit)) <= dep) {
+					if (!detecteCollision(plateau[x][y])) {
+						casesAtteignables.add(plateau[x][y]);
+					}
+				}
+			}
+		}
+		return casesAtteignables;
 	}
 
 	/**

@@ -103,7 +103,6 @@ public class Troll extends Personnage {
 		t.copy(this);
 		t.bouclier = this.bouclier;
 		t.depart = (Case) this.depart.clone();
-//		t.depart = this.depart; // No clone
 		t.butin = new ArrayList<Objet>();
 		for (Objet o : this.butin) {
 			t.butin.add((Objet) o.clone());

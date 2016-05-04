@@ -769,7 +769,12 @@ public class Jeu {
 	protected void deplacerTroll(Case destination) {
 		// We execute the test of the collision function of the character
 		if (deplacementValide(personnageSelectionne, destination)) {
+			System.out.println("================= AVANT ==================");
+			System.out.println(this.toString());
 			personnageSelectionne.deplacer(destination);// If we can, we move
+			System.out.println("================= APRES ==================");
+			System.out.println(personnageSelectionne.getPosition().toString());
+			System.out.println(this.toString());
 		}
 
 		// If the selected character is a troll, we execute the addItem operation
@@ -816,7 +821,16 @@ public class Jeu {
 	 */
 	public List<Action> listerActionsPossibles() {
 		List<Action> actions = new ArrayList<Action>();
+		
+		// Passer son tour
 		actions.add(new PasserTour());
+		
+		// Deplacer son troll
+		for (Case c : getJoueurCourant().getTroll().listerCasesAtteignables(plateau)) {
+			System.out.println("Add "+c);
+			actions.add(new DeplacerTroll(getJoueurCourant().getTroll(), c));
+		}
+		
 		return actions;
 	}
 	
