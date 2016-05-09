@@ -466,14 +466,6 @@ public class Jeu {
 
 				}
 
-				// This part represents the application of the dragon's fire
-				// on
-				// the dragon's position
-				for (Entite entite : this.personnageSelectionne.getPosition()
-						.getEntites()) {
-					tabRemoveEntite.add(entite);
-				}
-
 				// Since we can't delete something from a list on reading
 				// mode,
 				// we delete it from an other list
