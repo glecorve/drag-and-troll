@@ -46,7 +46,7 @@ public class Dragon extends Personnage {
 	/**
 	 * This image will be use if the dragon is awake
 	 */
-	private ImageIcon awaken;
+	private ImageIcon awake;
 	
 	/**
 	 * The state of a dragon is a boolean. True if it's awake, false if it sleeps
@@ -63,7 +63,7 @@ public class Dragon extends Personnage {
 		
 		this.myPicture = img;
 		this.sleeping = img;
-		this.awaken = awake;
+		this.awake = awake;
 		this.deplacementMax = DEPLACEMENT_MAX_DRAGON;
 		this.id = "Dragon_" + this.nbDragon;
 		this.nbDragon++;
@@ -73,7 +73,7 @@ public class Dragon extends Personnage {
 	
 	@Override
 	public Object clone() {
-		Dragon d = new Dragon(this.sleeping, this.awaken);
+		Dragon d = new Dragon(this.sleeping, this.awake);
 		d.copy(this);
 		d.etat = (EtatDragon) this.etat.clone();
 		return d;
@@ -81,27 +81,54 @@ public class Dragon extends Personnage {
 	
 	@Override
 	public Object clone(Case[][] plateau) {
-		Dragon d = new Dragon(this.sleeping, this.awaken);
+		Dragon d = new Dragon(this.sleeping, this.awake);
 		d.copy(this, plateau);
 		d.etat = (EtatDragon) this.etat.clone();
 		return d;
 	}
 	
+	/**
+	 * Check if the current dragon is sleeping
+	 * @return True if the dragon is sleeping
+	 */
 	public boolean estEndormi() {
 		return (etat instanceof Endormi);
 	}
 	
+	/**
+	 * Check if the current dragon is awake
+	 * @return True if the dragon is awake
+	 */
 	public boolean estEveille() {
 		return (etat instanceof Eveille);
 	}
 	
 	/**
+	 * Test if the fire of the current dragon can reach a give board square
+	 * @param cible The target board square
+	 * @return True if the dragon can fire onto the position
+	 */
+	public boolean peutAtteindre(Case cible) {
+		if (position.getAbscisse() == cible.getAbscisse()) {
+			int distance = Math.abs(position.getOrdonnee() - cible.getOrdonnee());
+			return (distance > 0 && distance <= Dragon.PORTEE_FEU);
+		}
+		else if (position.getOrdonnee() == cible.getOrdonnee()) {
+			int distance = Math.abs(position.getAbscisse() - cible.getAbscisse());
+			return (distance > 0 && distance <= Dragon.PORTEE_FEU);
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
 	 * This function returns the fire zone when the dragon must fire at the end of the turn.
-	 * @param limite
+	 * @param taillePlateau
 	 * @param jeu
 	 * @return zoneFeu
 	 */
-	public List<Case[]> getZoneFeu(int limite, Jeu jeu) {
+	public List<Case[]> getZoneFeu(int taillePlateau, Jeu jeu) {
 		//Creation of the list which will contains some tables of Case
 		ArrayList<Case[]> zoneFeu = new ArrayList<Case[]>();	
 		
@@ -121,7 +148,7 @@ public class Dragon extends Personnage {
 		 * 										x
 		 */
 		for (int i = 1; i <= Dragon.PORTEE_FEU; ++i) {
-			if ((this.getPosition().getOrdonnee() + i) < limite) {
+			if ((this.getPosition().getOrdonnee() + i) < taillePlateau) {
 				feuDroite[i-1] = jeu.getPlateau()[this.getPosition().getAbscisse()]
 						   [this.getPosition().getOrdonnee()+i];
 			}
@@ -138,7 +165,7 @@ public class Dragon extends Personnage {
 			}
 														
 														
-			if ((this.getPosition().getAbscisse() + i) < limite) {
+			if ((this.getPosition().getAbscisse() + i) < taillePlateau) {
 				feuBas[i-1] = jeu.getPlateau()[this.getPosition().getAbscisse()+i]
 															[this.getPosition().getOrdonnee()];
 			}
@@ -211,7 +238,7 @@ public class Dragon extends Personnage {
 	 */
 	public void reveiller() {
 		this.etat = new Eveille(DUREE_EVEIL);
-		this.myPicture = this.awaken;
+		this.myPicture = this.awake;
 	}
 	
 	/**

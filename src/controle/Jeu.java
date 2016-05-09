@@ -437,7 +437,6 @@ public class Jeu {
 				for (int i = 0; i < directionsAvecTroll.size(); i++) {
 					for (int j = 0; j < directionsAvecTroll.get(i).length; j++) {
 						
-						System.out.println("BRULE "+directionsAvecTroll.get(i)[j]);
 						/*
 						 * We look if there is a rock in the order of
 						 * verification. If there is, we stop the analysis.
