@@ -652,7 +652,6 @@ public class Jeu {
 			t = new Troll(this.trollIcon[i], this.trollIcon[4 + i]);
 			t.setJoueur(i);
 			t.setScore(i);
-			t.augmenterMagie(1);
 			joueurs.get(i).setTroll(t);
 			this.scoreMax += i;
 			this.ajouterEntite(t, currentX, currentY);
