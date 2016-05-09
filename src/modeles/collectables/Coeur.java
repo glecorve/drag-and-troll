@@ -2,6 +2,8 @@ package modeles.collectables;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This class represent the heart object
  * @author prukev, Brahim
@@ -31,6 +33,21 @@ public class Coeur extends Objet {
 		Coeur c = new Coeur(this.myPicture);
 		c.copy(this);
 		return c;
+	}
+	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Coeur c = new Coeur(this.myPicture);
+		c.copy(this, plateau);
+		return c;
+	}
+
+	/**
+	 * To string function. 
+	 */
+	@Override
+	public String toString() {
+		return "Coeur";
 	}
 
 }

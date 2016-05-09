@@ -1,6 +1,7 @@
 package modeles.personnages;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 
@@ -21,6 +22,16 @@ public class Dragon extends Personnage {
 	 * Maximum number of moves for any dragon
 	 */
 	private static final int DEPLACEMENT_MAX_DRAGON = 2;
+	
+	/**
+	 * Number of rounds during which the dragon remains awaken
+	 */
+	private static final int DUREE_EVEIL = 10;
+	
+	/**
+	 * Number of rounds during which the dragon remains awaken
+	 */
+	private static final int PORTEE_FEU = 4;
 	
 	/**
 	 * This data can give us the number of Dragon there is in the game. It's also use for the id.
@@ -68,21 +79,37 @@ public class Dragon extends Personnage {
 		return d;
 	}
 	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Dragon d = new Dragon(this.sleeping, this.awaken);
+		d.copy(this, plateau);
+		d.etat = (EtatDragon) this.etat.clone();
+		return d;
+	}
+	
+	public boolean estEndormi() {
+		return (etat instanceof Endormi);
+	}
+	
+	public boolean estEveille() {
+		return (etat instanceof Eveille);
+	}
+	
 	/**
 	 * This function returns the fire zone when the dragon must fire at the end of the turn.
 	 * @param limite
 	 * @param jeu
 	 * @return zoneFeu
 	 */
-	public ArrayList<Case[]> getZoneFeu(int limite, Jeu jeu) {
+	public List<Case[]> getZoneFeu(int limite, Jeu jeu) {
 		//Creation of the list which will contains some tables of Case
 		ArrayList<Case[]> zoneFeu = new ArrayList<Case[]>();	
 		
 		//The dragon fires in a cross. There will be 4 zones around him.
-		Case[] feuDroite = new Case[3];	//Right zone
-		Case[] feuHaut = new Case[3];	//Left zone
-		Case[] feuGauche = new Case[3];	//Up zone
-		Case[] feuBas = new Case[3];	//Down zone
+		Case[] feuDroite = new Case[Dragon.PORTEE_FEU];	//Right zone
+		Case[] feuHaut = new Case[Dragon.PORTEE_FEU];	//Left zone
+		Case[] feuGauche = new Case[Dragon.PORTEE_FEU];	//Up zone
+		Case[] feuBas = new Case[Dragon.PORTEE_FEU];	//Down zone
 		
 		/*	For each way, we add the case in the corresponding table following this schema :
 		 * 										x
@@ -93,7 +120,7 @@ public class Dragon extends Personnage {
 		 * 										x
 		 * 										x
 		 */
-		for (int i = 1; i < 4; ++i) {
+		for (int i = 1; i <= Dragon.PORTEE_FEU; ++i) {
 			if ((this.getPosition().getOrdonnee() + i) < limite) {
 				feuDroite[i-1] = jeu.getPlateau()[this.getPosition().getAbscisse()]
 						   [this.getPosition().getOrdonnee()+i];
@@ -132,7 +159,7 @@ public class Dragon extends Personnage {
 	 */
     @Override
 	public String toString() {
-		return "Dragon [sleeping=" + sleeping + ", awaken=" + awaken + ", etat=" + etat + "]";
+		return "Dragon [id="+id+", etat=" + etat + "]";
 	}
 
 	
@@ -151,7 +178,7 @@ public class Dragon extends Personnage {
 			return false;
 		}
 		Dragon other = (Dragon) obj;
-		if (this.id != other.id) {
+		if (!this.id.equals(other.id)) {
 			return false;
 		}
 		return true;
@@ -182,15 +209,15 @@ public class Dragon extends Personnage {
 	/**
 	 * Function used in order to wake up the dragon
 	 */
-	public void wakeUp() {
-		this.etat = new Eveille();
+	public void reveiller() {
+		this.etat = new Eveille(DUREE_EVEIL);
 		this.myPicture = this.awaken;
 	}
 	
 	/**
 	 * Function used when the dragon comes back to sleep
 	 */
-	public void sleep() {
+	public void endormir() {
 		this.etat = new Endormi();
 		this.myPicture = this.sleeping;
 	}

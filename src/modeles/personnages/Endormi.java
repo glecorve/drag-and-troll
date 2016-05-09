@@ -26,5 +26,10 @@ public class Endormi implements EtatDragon {
 	public void deplacer(Case newCase, Dragon dragon){
 		
 	}
+	
+	@Override
+	public String toString() {
+		return "Endormi";
+	}
 
 }

@@ -2,6 +2,8 @@ package modeles.collectables;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This class represent the shield object
  * @author prukev, Brahim
@@ -27,10 +29,25 @@ public class Bouclier extends Objet {
 		this.nBouclier++;
 	}
 
+	/**
+	 * To string function. 
+	 */
+	@Override
+	public String toString() {
+		return "Bouclier";
+	}
+	
 	@Override
 	public Object clone() {
 		Bouclier b = new Bouclier(this.myPicture);
 		b.copy(this);
+		return b;
+	}
+
+	@Override
+	public Object clone(Case[][] plateau) {
+		Bouclier b = new Bouclier(this.myPicture);
+		b.copy(this, plateau);
 		return b;
 	}
 

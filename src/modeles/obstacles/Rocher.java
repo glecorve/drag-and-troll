@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This class represents the rock object which will be the strongest obstacle
  * @author prukev, Brahim
@@ -32,6 +34,13 @@ public class Rocher extends Obstacle {
 	public Object clone() {
 		Rocher r = new Rocher(this.myPicture);
 		r.copy(this);
+		return r;
+	}
+	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Rocher r = new Rocher(this.myPicture);
+		r.copy(this, plateau);
 		return r;
 	}
 	

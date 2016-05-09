@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 
 import vues.JeuIHM;
 
@@ -35,14 +36,11 @@ import images.Images;
 public class Jeu {
 
 	/**
-	 * Number of rounds during which the dragons remains awaken
-	 */
-	private static final int DUREE_DRAGON = 10;
-
-	/**
 	 * Game icons images
 	 */
 	Images images = new Images();
+	
+	static JFrame test = new JFrame();
 	
 	/**
 	 * List of all players
@@ -62,7 +60,7 @@ public class Jeu {
 	/**
 	 * This list contains all the dragons
 	 */
-	private Set<Dragon> dragonList = new HashSet<Dragon>();
+	private List<Dragon> dragonList = new ArrayList<Dragon>();
 
 	/**
 	 * This list contains all the trolls
@@ -168,11 +166,11 @@ public class Jeu {
 			this.joueurs.add(new Joueur("Joueur "+i));
 		}
 
-		if (nombreJoueurs > 3 || Jeu.taillePlateau > 9) {
-			for (int i = 0; i < 8; i++) {
-				ajouterObjetAleatoire();
-			}
-		}
+//		if (nombreJoueurs > 3 || Jeu.taillePlateau > 9) {
+//			for (int i = 0; i < 8; i++) {
+//				ajouterObjetAleatoire();
+//			}
+//		}
 		
 		this.deletedPlayers = new ArrayList<Troll>(4);
 	}
@@ -184,34 +182,51 @@ public class Jeu {
 	public Jeu(Jeu aCopier) {
 		
 		this.images = aCopier.images;
-		listeEntite = new HashSet<Entite>();
-		for (Entite e : aCopier.listeEntite) {
-			listeEntite.add((Entite) e.clone());
-		}
 		
 		// The table will be a table of table size of the argument
-		this.plateau = new Case[taillePlateau][taillePlateau];
+		this.plateau = new Case[taillePlateau][taillePlateau];		
+		this.listeEntite = new HashSet<Entite>();
 		this.tabRemoveEntite = new HashSet<Entite>();
-		this.dragonList = new HashSet<Dragon>();
+		this.dragonList = new ArrayList<Dragon>();
 		this.trollList = new ArrayList<Troll>();
 		this.deletedPlayers = new ArrayList<Troll>(aCopier.deletedPlayers);
+		// Clone the home square first
+		this.plateau[aCopier.maison.getAbscisse()][aCopier.maison.getOrdonnee()]
+				 = (Case) aCopier.plateau[aCopier.maison.getAbscisse()][aCopier.maison.getOrdonnee()].clone(this.plateau);
+		this.maison = this.plateau[aCopier.maison.getAbscisse()][aCopier.maison.getOrdonnee()];
 		for (int i = 0; i < taillePlateau; ++i) {
 			for (int j = 0; j < taillePlateau; ++j) {
 				// We create each Case in the table
-				this.plateau[i][j] = (Case) aCopier.plateau[i][j].clone();
+//				System.out.println("i="+i+", j="+j);
+//				for (Entite e : aCopier.plateau[i][j].getEntites()) {
+//					System.out.println(aCopier.plateau[i][j].toString());
+//					System.out.println(e);
+//				}
+				if (i != maison.getAbscisse() || j != maison.getOrdonnee()) {
+					this.plateau[i][j] = (Case) aCopier.plateau[i][j].clone(this.plateau);
+				}
+//				System.out.println("++");
+//				for (Entite e : this.plateau[i][j].getEntites()) {
+//					System.out.println(this.plateau[i][j].toString());
+//					System.out.println(e);
+//				}
+//				System.out.println("--");
 				for (Entite e : this.plateau[i][j].getEntites()) {
+					listeEntite.add(e);
 					if (aCopier.tabRemoveEntite.contains(e)) { tabRemoveEntite.add(e); }
-					if (e instanceof Dragon && aCopier.dragonList.contains(e)) { dragonList.add((Dragon) e); }
-					if (e instanceof Troll && aCopier.trollList.contains(e)) { trollList.add((Troll) e); }
-					if (e instanceof Troll && aCopier.deletedPlayers.contains(e)) { deletedPlayers.add((Troll) e); }
+					if (e instanceof Dragon) { dragonList.add((Dragon) e); }
+					if (e instanceof Troll) {
+						trollList.add((Troll) e);
+						((Troll) e).setDepart(maison);
+					}
+//					if (e instanceof Troll && aCopier.deletedPlayers.contains(e)) { deletedPlayers.add((Troll) e); }
 				}
 			}
 		}
 		
-		maison = plateau[aCopier.maison.getAbscisse()][aCopier.maison.getOrdonnee()];
-		scoreMax = aCopier.scoreMax;
+		this.scoreMax = aCopier.scoreMax;
 		
-		// Find the current character
+		// Find the selected character
 		boolean trouve = false;
 		Iterator<Dragon> itd = dragonList.iterator();
 		while (itd.hasNext() && !trouve) {
@@ -232,7 +247,7 @@ public class Jeu {
 		
 		this.joueurs = new ArrayList<Joueur>(nombreJoueurs);
 		for (int i = 0; i < nombreJoueurs; i++) {
-			this.joueurs.add(aCopier.joueurs.get(i).clone());
+			this.joueurs.add(aCopier.joueurs.get(i).clone(plateau));
 			// Find the troll of player i
 			for (Troll t : trollList) {
 				if (t.equals(aCopier.joueurs.get(i).getTroll())) {
@@ -251,6 +266,32 @@ public class Jeu {
 	
 	public Object clone() {
 		return new Jeu(this);
+	}
+	
+	public void reinitialiser() {
+		this.listeEntite.clear();
+		this.tabRemoveEntite.clear();
+		this.dragonList.clear();
+		this.trollList.clear();
+		this.deletedPlayers.clear();
+		this.scoreMax = 0;
+		this.personnageSelectionne = null;
+		this.indiceJoueurCourant = 0;
+		this.termine = false;
+		this.numeroTour = 1;
+		
+		for (int i = 0; i < taillePlateau; ++i) {
+			for (int j = 0; j < taillePlateau; ++j) {
+				// We create each square of the board
+				this.plateau[i][j].vider();
+			}
+		}
+		System.out.println("nb joueurs "+nombreJoueurs);
+		for (int i = 0; i < nombreJoueurs; i++) {
+			this.joueurs.get(i).setTroll(null);
+		}
+		
+		System.out.println(this.toString());
 	}
 	
 	/**
@@ -279,6 +320,38 @@ public class Jeu {
 	public Case[][] getPlateau() {
 		return this.plateau;
 	}
+	
+	/**
+	 * Return a specific square on the board
+	 * @param x
+	 * @param y
+	 * @return An instance of Case, or null if (x,y) is out of the board
+	 */
+	public Case getCase(int x, int y) {
+		if (x >= 0 && x < this.plateau.length
+				&& y >= 0 && y < this.plateau.length) {
+			return this.plateau[x][y];
+		}
+		else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get the list of all dragons
+	 * @return A list
+	 */
+	public List<Dragon> getDragons() {
+		return dragonList;
+	}
+	
+	/**
+	 * Get the list of all trolls
+	 * @return A list
+	 */
+	public List<Troll> getTrolls() {
+		return trollList;
+	}
 
 	/**
 	 * This operation add an entity to the game
@@ -288,7 +361,7 @@ public class Jeu {
 	 * @param y
 	 */
 	public void ajouterEntite(Entite e, int x, int y) {
-		this.plateau[x][y].addEntite(e);
+		this.plateau[x][y].ajouterEntite(e);
 		this.listeEntite.add(e);
 		e.setPosition(this.plateau[x][y]);
 		if (e instanceof Troll) {
@@ -332,43 +405,58 @@ public class Jeu {
 	}
 
 	/**
-	 * This function represents the fire function of the dragon executed at each
-	 * end turn
+	 * This function represents the fire function of the dragon
 	 * 
 	 * @param limite
 	 */
 	public void cracherFeu(int limite) {
-		// We execute the operation only if the dragon was the selected
-		// character
-		if (this.personnageSelectionne instanceof Dragon) {
+		// We execute the operation only if the dragon was the selected character
+		for (Dragon d : dragonList) {
 
-			Dragon drag = (Dragon) this.personnageSelectionne;
-			if (drag.getEtat() instanceof Eveille) {
+			if (d.getEtat() instanceof Eveille) {
 				// We get all the Cases around the dragon
-				ArrayList<Case[]> zone = ((Dragon) this.personnageSelectionne)
+				List<Case[]> directions = ((Dragon) this.personnageSelectionne)
 						.getZoneFeu(limite, this);
-
-				// We execute successifs checking on each case
-				for (Case[] lacase : zone) {
-
-					for (int i = 0; i < 3; ++i) {
-
+				List<Case[]> directionsAvecTroll = new ArrayList<Case[]>();
+				// Check if a troll is in the fire area
+				for (Troll t : trollList) {
+					for (int i = 0; i < directions.size(); i++) {
+						boolean trollPresent = false;
+						for (int j = 0; j < directions.get(i).length && !trollPresent; j++) {
+							if (t.getPosition().equals(directions.get(i)[j])) {
+								trollPresent = true;
+							}
+						}
+						if (trollPresent) {
+							directionsAvecTroll.add(directions.get(i));
+						}
+					}
+				}
+				
+				// Fire if a troll is there
+				// We successively check each case
+				for (int i = 0; i < directionsAvecTroll.size(); i++) {
+					for (int j = 0; j < directionsAvecTroll.get(i).length; j++) {
 						/*
 						 * We look if there is a rock in the order of
 						 * verification. If there is, we stop the analysis.
 						 */
-						if (lacase[i] != null
-								&& !lacase[i].getEntites().isEmpty()
-								&& (lacase[i].getFirstEntite() instanceof Rocher)) {
+						if (directionsAvecTroll.get(i)[j] != null
+								&& !directionsAvecTroll.get(i)[j].getEntites().isEmpty()
+								&& (directionsAvecTroll.get(i)[j].getPremiereEntite() instanceof Rocher)) {
 							break;// F
 						}
 
-						// If there is an entity and we can apply the dragon's
+						// If there is an entity and we can apply the
+						// dragon's
 						// effect, we do it
-						if (lacase[i] != null && lacase[i].getEntites() != null) {
+						if (directionsAvecTroll.get(i)[j] != null
+								&& directionsAvecTroll.get(i)[j].getEntites() != null) {
 
-							for (Entite entite : lacase[i].getEntites()) {
-								// But we first save it in an intermediary list
+							for (Entite entite : directionsAvecTroll.get(i)[j]
+									.getEntites()) {
+								// But we first save it in an intermediary
+								// list
 								tabRemoveEntite.add(entite);
 							}
 
@@ -377,14 +465,16 @@ public class Jeu {
 
 				}
 
-				// This part represents the application of the dragon's fire on
+				// This part represents the application of the dragon's fire
+				// on
 				// the dragon's position
 				for (Entite entite : this.personnageSelectionne.getPosition()
 						.getEntites()) {
 					tabRemoveEntite.add(entite);
 				}
 
-				// Since we can't delete something from a list on reading mode,
+				// Since we can't delete something from a list on reading
+				// mode,
 				// we delete it from an other list
 				for (Entite entite : tabRemoveEntite) {
 
@@ -400,6 +490,9 @@ public class Jeu {
 					entite.dragonEffet();
 				}
 				tabRemoveEntite = new HashSet<Entite>();
+				if (!directionsAvecTroll.isEmpty()) {
+					d.endormir();
+				}
 			}
 		}
 	}
@@ -421,7 +514,7 @@ public class Jeu {
 				i.setPosition(new Case(l, c));
 				this.scoreMax += i.getBonus();
 			}
-			plateau[l][c].addEntite(i);
+			plateau[l][c].ajouterEntite(i);
 		}
 
 	}
@@ -549,8 +642,8 @@ public class Jeu {
 	 */
 	@SuppressWarnings("static-access")
 	public void genererPlateauAleatoire() {
-		int currentX = 4;
-		int currentY = 4;
+		int currentX = (int) (taillePlateau-1)/2;
+		int currentY = (int) (taillePlateau-1)/2;
 		boolean[][] browsedCheck = new boolean[taillePlateau][taillePlateau];
 		List<Point> history = new LinkedList<Point>();
 		// Add trolls
@@ -559,6 +652,7 @@ public class Jeu {
 			t = new Troll(this.trollIcon[i], this.trollIcon[4 + i]);
 			t.setJoueur(i);
 			t.setScore(i);
+			t.augmenterMagie(1);
 			joueurs.get(i).setTroll(t);
 			this.scoreMax += i;
 			this.ajouterEntite(t, currentX, currentY);
@@ -625,7 +719,7 @@ public class Jeu {
 				}
 			}
 			if (!browsedCheck[currentX][currentY]) {
-				this.plateau[currentX][currentY].deleteAllEntities();
+				this.plateau[currentX][currentY].vider();
 				browsedCheck[currentX][currentY] = true;
 				history.add(new Point(currentX, currentY));
 				int type = (int) (Math.random() * 100);
@@ -739,6 +833,13 @@ public class Jeu {
 		}
 		nombreDragons = dragon;
 	}
+	
+	public int getScoreVictoire() {
+		return ((getScoreMax()
+				+1
+				+((getNombreJoueurs()-1)*getNombreJoueurs())/2)
+				/getNombreJoueurs());
+	}
 
 	public int getScoreMax() {
 		return scoreMax;
@@ -756,13 +857,14 @@ public class Jeu {
 	 * @param newC
 	 */
 	public void deplacer(Case newC) {
+		// Take care to clones of Case instances
+		// => Find the right case in the board
 		if (personnageSelectionne instanceof Troll) {
 			deplacerTroll(newC);
 		}
 		else if (personnageSelectionne instanceof Dragon) {
 			deplacerDragon(newC);
 		}
-		plateau[newC.getAbscisse()][newC.getOrdonnee()] = newC;
 	}
 	
 	
@@ -770,18 +872,13 @@ public class Jeu {
 	protected void deplacerTroll(Case destination) {
 		// We execute the test of the collision function of the character
 		if (deplacementValide(personnageSelectionne, destination)) {
-			System.out.println("================= AVANT ==================");
-			System.out.println(this.toString());
 			personnageSelectionne.deplacer(destination);// If we can, we move
-			System.out.println("================= APRES ==================");
-			System.out.println(personnageSelectionne.getPosition().toString());
-			System.out.println(this.toString());
 		}
 
 		// If the selected character is a troll, we execute the addItem operation
 		if (personnageSelectionne instanceof Troll) {
 			Troll t = (Troll) personnageSelectionne;
-			(t).addItem();
+			(t).ajouterObjet();
 			if (!t.getButin().isEmpty()
 					&& (!backPackMode || t.getPosition().equals(t.getDepart()))) {
 				((Troll) personnageSelectionne).validerButin();
@@ -792,9 +889,11 @@ public class Jeu {
 	
 	
 	protected void deplacerDragon(Case destination) {
-		if (peutReveillerDragon(getJoueurCourant(), personnageSelectionne)
-				&& deplacementValide(personnageSelectionne, destination)) {
-			personnageSelectionne.deplacer(destination);// If we can, we move
+		if (personnageSelectionne instanceof Dragon) {
+			if (deplacementValide(personnageSelectionne, destination)) {
+				// If we can, we move
+				personnageSelectionne.deplacer(destination);
+			}
 		}
 	}
 	
@@ -811,9 +910,8 @@ public class Jeu {
 	 * @param dragon Dragon
 	 * @return True if the dragon can be woken up
 	 */
-	public boolean peutReveillerDragon(Joueur j, Personnage dragon) {
-		return true;
-		// TODO
+	public boolean peutReveillerDragon(Joueur j, Dragon dragon) {
+		return (j.getTroll().getMagie() > 0 && dragon.estEndormi());
 	}
 
 	/**
@@ -828,8 +926,16 @@ public class Jeu {
 		
 		// Deplacer son troll
 		for (Case c : getJoueurCourant().getTroll().listerCasesAtteignables(plateau)) {
-			System.out.println("Add "+c);
 			actions.add(new DeplacerTroll(getJoueurCourant().getTroll(), c));
+		}
+		
+		// Deplacer le ou les dragons
+		for (Dragon d : dragonList) {
+			if (this.peutReveillerDragon(getJoueurCourant(), d)) {
+				for (Case c : d.listerCasesAtteignables(plateau)) {
+					actions.add(new ReveillerDeplacerDragon(d, c));
+				}
+			}
 		}
 		
 		return actions;
@@ -849,11 +955,22 @@ public class Jeu {
 			return deplacementValide(((DeplacerTroll) a).getPersonnage(), ((DeplacerTroll) a).getDestination());
 		}
 		else if (a instanceof ReveillerDeplacerDragon) {
-			return peutReveillerDragon(getJoueurCourant(), ((ReveillerDeplacerDragon) a).getPersonnage())
-					&& deplacementValide(((DeplacerTroll) a).getPersonnage(), ((DeplacerTroll) a).getDestination());
+			return peutReveillerDragon(getJoueurCourant(), (Dragon) ((ReveillerDeplacerDragon) a).getPersonnage())
+					&& deplacementValide(((DeplacerPersonnage) a).getPersonnage(), ((DeplacerPersonnage) a).getDestination());
 		}
 		else {
 			return false;
+		}
+	}
+	
+	/**
+	 * Start the game
+	 */
+	public void demarrerTour() {
+		while (getJoueurCourant() instanceof AbstractIA) {
+			jouerIA();
+			finirTour();
+			JeuIHM.getInstance().refresh();
 		}
 	}
 	
@@ -863,24 +980,20 @@ public class Jeu {
     public synchronized void jouerIA() {
         if (getJoueurCourant() instanceof AbstractIA) {
             synchronized(this) {
-                System.out.println(Thread.currentThread().getName()+": "+"================================[ " + getJoueurCourant().getClass().toString() + " " + getJoueurCourant().getNom() + " ]==========================================");
+//                System.out.println(Thread.currentThread().getName()+": "+"================================[ " + getJoueurCourant().getClass().toString() + " " + getJoueurCourant().getNom() + " ]==========================================");
                 ExecutorService executor = Executors.newSingleThreadExecutor();
                 AbstractIA ia = (AbstractIA) getJoueurCourant();
                 IAThread calcul = new IAThread(ia, this, executor);
                 executor.execute(calcul);
                 try {
-//                    System.out.println("Top");
                     if (!executor.awaitTermination(AbstractIA.DELAI_DE_REFLEXION, TimeUnit.MILLISECONDS))
                     {
                         // Forcer la fin du thread du joueur artificiel
-//                        System.out.println(Thread.currentThread().getName()+": "+"Forcer l'interruption");
                         executor.shutdownNow();
-//                        System.out.println(Thread.currentThread().getName()+": "+"est interrompu ? = " + (calcul.isInterrupted()?"oui":"non"));
                     }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null, ex);
                 }
-//                System.out.println("Stop");
                 try {
                     calcul.join();
                 } catch (InterruptedException ex) {
@@ -911,7 +1024,7 @@ public class Jeu {
 //                    System.out.println("Nouveau coup calcule = " + coup);
                 }
 
-                System.out.println("Coup choisi = "+action.toString());
+//                System.out.println("Coup choisi = "+action.toString());
 
                 try {
                     action.appliquer(this);
@@ -924,19 +1037,17 @@ public class Jeu {
                     action.appliquer(this);
                 }
 
-
                 JeuIHM.getInstance().revalidate();
                 try {
                     Thread.sleep(10);
 //                    Thread.sleep(400);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                System.out.println("Fin de tour");
-                for (Joueur j : this.joueurs) {
-                    System.out.println(j.toString());
-                }
+//                System.out.println("Fin de tour");
+//                for (Joueur j : this.joueurs) {
+//                    System.out.println(j.toString());
+//                }
             }
         }
     }
@@ -946,12 +1057,6 @@ public class Jeu {
 	 * loop is
 	 */
 	public void finirTour() {
-		do {
-			// Try to play the AI player if needed
-			if (getJoueurCourant() instanceof AbstractIA) {
-				jouerIA();
-			}
-			
 			if (this.personnageSelectionne != null) {
 				// Move reset if the selected character is not null
 				this.personnageSelectionne.resetDeplacement();
@@ -967,8 +1072,9 @@ public class Jeu {
 				if (this.personnageSelectionne instanceof Troll) {
 					Troll t = (Troll) this.personnageSelectionne;
 					if (nombreJoueurs != 0
-							&& t.getScore() >= this.scoreMax / nombreJoueurs)
+							&& t.getScore() >= getScoreVictoire()) {
 						this.termine = true;
+					}
 				}
 		
 				// If a dragon stops its movement on an obstacle
@@ -977,7 +1083,7 @@ public class Jeu {
 							.getEntites()) {
 						if (entite instanceof Obstacle) {
 							// We move the dragon to its previous position
-							this.personnageSelectionne.turnBack();
+							this.personnageSelectionne.revenirEnArriere();
 						}
 					}
 				}
@@ -985,10 +1091,14 @@ public class Jeu {
 		
 			// Time to check if all the awaken dragons go back to sleep
 			for (Dragon d : dragonList) {
-				if (d.getEtat() instanceof Eveille) {
+				if (d.estEveille()) {
 					Eveille dA = (Eveille) d.getEtat();
-					if ((this.numeroTour - dA.getNbTurn()) >= DUREE_DRAGON)
-						d.sleep();
+					if (dA.getNombreToursRestants() == 0) {
+						d.endormir();
+					}
+					else {
+						dA.diminuerToursRestants();
+					}
 				}
 			}
 		
@@ -1003,7 +1113,7 @@ public class Jeu {
 			}
 		
 			for (Entite e : this.tabRemoveEntite) {
-				e.getPosition().deleteEntite(e);
+				e.getPosition().supprimerEntite(e);
 				this.trollList.remove(e);
 			}
 		
@@ -1032,11 +1142,11 @@ public class Jeu {
 			this.indiceJoueurCourant = this.indiceJoueurCourant % nombreJoueurs;
 		
 			// The selected character is the next troll
-			personnageSelectionne = chercherTroll("Troll_" + (indiceJoueurCourant + 1));
+			personnageSelectionne = getJoueurCourant().getTroll();
 			
-			System.out.println(this.toString());
+//			System.out.println(this.toString());
+//			JOptionPane.showMessageDialog(JeuIHM.getInstance(), "hop "+(getJoueurCourant() instanceof AbstractIA));
 
-		} while (getJoueurCourant() instanceof AbstractIA);
 	}
 
 	/**
@@ -1074,11 +1184,11 @@ public class Jeu {
 	/**
 	 * This function will allow all the dragons to wake up
 	 */
-	public void reveillerDragons() {
-		for (Dragon d : dragonList) {
-			d.wakeUp();
-			((Eveille) d.getEtat()).setNbTurn(this.numeroTour);
-		}
+	public void reveillerDragon(Dragon d) {
+		setPersonnageSelectionne(d);
+		d.reveiller();
+		Troll t = getJoueurCourant().getTroll();
+		t.setMagie(t.getMagie() - 1);
 	}
 
 	/**
@@ -1174,7 +1284,16 @@ public class Jeu {
 
 	@Override
 	public String toString() {
-		String str =  "Jeu [joueurs=" + joueurs + ", plateau=\n";
+		String str =  "Jeu " + this.getClass().getName() + "@" + Integer.toHexString(this.hashCode()) + "\n";
+		str += "\t[joueurs=\n";
+		for (Joueur j : joueurs) {
+			str += "\t" + j + "\n";
+		}
+		str += "\t[dragons=\n";
+		for (Dragon d : dragonList) {
+			str += "\t" + d + "\n";
+		}
+		str += "\t, plateau=\n";
 		for (int i = 0; i < taillePlateau; i++) {
 			for (int j = 0; j < taillePlateau; j++) {
 				str += "\t"+plateau[i][j].toString();
@@ -1182,9 +1301,9 @@ public class Jeu {
 			str += "\n";
 		}
 		str += " scoreMax=" + scoreMax
-			+ ", personnageSelectionne=" + personnageSelectionne
-			+ ", indiceJoueurCourant=" + indiceJoueurCourant + ", termine="
-			+ termine + ", numeroTour=" + numeroTour + "]";
+			+ ",\n personnageSelectionne=" + personnageSelectionne
+			+ ",\n indiceJoueurCourant=" + indiceJoueurCourant + ",\n termine="
+			+ termine + ",\n numeroTour=" + numeroTour + "]";
 		return str;
 	}
 	

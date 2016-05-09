@@ -9,8 +9,8 @@ import controle.Jeu;
  * @author Gwenole Lecorve
  */
 public abstract class DeplacerPersonnage extends Action {
-	private final Personnage personnage;
-    private final Case destination;
+	protected final Personnage personnage;
+    protected final Case destination;
     
     public DeplacerPersonnage(Personnage p, Case cible) {
     	super();
@@ -24,12 +24,6 @@ public abstract class DeplacerPersonnage extends Action {
     
     public Case getDestination() {
         return destination;
-    }
-
-    @Override
-    public void appliquer(Jeu etat) {
-        etat.setPersonnageSelectionne(personnage);
-        etat.deplacer(destination);
     }
 
 }

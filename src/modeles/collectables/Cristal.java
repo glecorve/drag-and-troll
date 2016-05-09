@@ -2,6 +2,8 @@ package modeles.collectables;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This class represent the cristal object
  * @author prukev, Brahim
@@ -33,6 +35,21 @@ public class Cristal extends Objet {
 		Cristal c = new Cristal(this.myPicture);
 		c.copy(this);
 		return c;
+	}
+	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Cristal c = new Cristal(this.myPicture);
+		c.copy(this, plateau);
+		return c;
+	}
+
+	/**
+	 * To string function. 
+	 */
+	@Override
+	public String toString() {
+		return "Cristal";
 	}
 
 }

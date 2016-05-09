@@ -36,13 +36,33 @@ public abstract class Entite {
 	public abstract Object clone();
 	
 	/**
+	 * Clone the object except the board squares. The latter are referenced from a given board.
+	 * @param plateau Board
+	 * @return The clone
+	 */
+	public abstract Object clone(Case[][] plateau);
+
+	/**
 	 * Copy an object onto the current instance.
 	 * This method is useful to factor cloning instructions in abstract classes (no available constructor).
 	 * @param e Object to be copied
+	 * @param plateau Board from which Case instances should be taken (no clone)
 	 */
 	protected void copy(Entite e) {
 		this.id = new String(e.id);
 		this.position = (Case) e.position.clone();
+		this.myPicture = e.myPicture;
+	}
+	
+	/**
+	 * Copy an object onto the current instance.
+	 * This method is useful to factor cloning instructions in abstract classes (no available constructor).
+	 * @param e Object to be copied
+	 * @param plateau Board from which Case instances should be taken (no clone)
+	 */
+	protected void copy(Entite e, Case[][] plateau) {
+		this.id = new String(e.id);
+		this.position = plateau[e.position.getAbscisse()][e.position.getOrdonnee()];
 		this.myPicture = e.myPicture;
 	}
 	

@@ -14,12 +14,20 @@ public class Eveille implements EtatDragon {
 	/**
 	 * This number will take the actual turn of game when the dragon wakes up
 	 */
-	private int nbTurn = 0;
+	private int nombreToursRestants = 0;
 	
 	/**
 	 * No modifications in the constructor
 	 */
 	public Eveille() {
+	}
+
+	/**
+	 * Constructor
+	 * @param toursInitiaux Initial number of rounds
+	 */
+	public Eveille(int toursInitiaux) {
+		nombreToursRestants = toursInitiaux;
 	}
 	
 	@Override
@@ -27,36 +35,47 @@ public class Eveille implements EtatDragon {
 		return new Eveille();
 	}
 	
-	
 	/**
 	 * This function will be called only if the dragon is awake
 	 */
 	public void deplacer(Case newCase, Dragon dragon){
 			if (dragon.deplacementActuel < dragon.deplacementMax) {
 				dragon.previousPosition = dragon.getPosition();
-				dragon.getPosition().deleteEntite(dragon);
-				newCase.addEntite(dragon);
+				dragon.getPosition().supprimerEntite(dragon);
+				newCase.ajouterEntite(dragon);
 				dragon.setPosition(newCase);
 				dragon.deplacementActuel++;
 			}
 	}
 
 	/**
-	 * Nbturn getter
-	 * @return nbTurn
+	 * nombreToursRestants getter
+	 * @return nombreToursRestants
 	 */
-	public int getNbTurn() {
-		return nbTurn;
+	public int getNombreToursRestants() {
+		return nombreToursRestants;
 	}
 
 	/**
-	 * NbTurn setter
-	 * @param nbTurn
+	 * nombreToursRestants setter
+	 * @param nombreToursRestants
 	 */
-	public void setNbTurn(int nbTurn) {
-		this.nbTurn = nbTurn;
+	public void setNombreToursRestants(int nbTurn) {
+		this.nombreToursRestants = nbTurn;
 	}
 	
+	/**
+	 * Decrement the number of remaining rounds
+	 */
+	public void diminuerToursRestants() {
+		if (nombreToursRestants > 0) {
+			nombreToursRestants--;
+		}
+	}
 	
+	@Override
+	public String toString() {
+		return "Eveille pour " + nombreToursRestants + " tours";
+	}
 
 }

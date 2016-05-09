@@ -1,7 +1,7 @@
 package modeles.collectables;
 
+import modeles.Case;
 import modeles.Entite;
-import modeles.personnages.Personnage;
 import modeles.personnages.Troll;
 
 /**
@@ -21,6 +21,11 @@ public abstract class Objet extends Entite {
     	bonus = o.bonus;
     }
     
+    protected void copy(Objet o, Case[][] plateau) {
+    	super.copy(o, plateau);
+    	bonus = o.bonus;
+    }
+    
     /**
      * This function applies the item's bonus. Depending the object, the bonus will not
      * act on the same data of the troll.
@@ -28,16 +33,16 @@ public abstract class Objet extends Entite {
      */
     public void effet(Troll troll){
     	if (this instanceof Bourse || this instanceof Piece) {
-    		troll.addScore(this.bonus);
+    		troll.augmenterScore(this.bonus);
     	}
     	if (this instanceof Coeur) {
-    		troll.addLife(this.bonus);
+    		troll.augmenterVies(this.bonus);
     	}
     	if (this instanceof Cristal) {
-    		troll.addMagie(this.bonus);
+    		troll.augmenterMagie(this.bonus);
     	}
     	if (this instanceof Bouclier) {
-    		troll.addBouclier(this.bonus);
+    		troll.ajouterBouclier(this.bonus);
     	}
     }
     

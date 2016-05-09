@@ -50,7 +50,7 @@ public class Case {
 			Case c = new Case(this.abscisse, this.ordonnee);
 			c.beingCloned = true;
 			for (Entite e : this.entites) {
-				c.addEntite(e);
+				c.ajouterEntite(e);
 			}
 			c.beingCloned = false;
 			return c;
@@ -60,12 +60,20 @@ public class Case {
 		}
 	}
 	
-	private Object clone_no_recursion() {
-		Case c = new Case(this.abscisse, this.ordonnee);
-		for (Entite e : this.entites) {
-			c.addEntite(e);
+	// Synchronized because of beingCloned
+	public synchronized Object clone(Case[][] plateau) {
+		if (!beingCloned) {
+			Case c = new Case(this.abscisse, this.ordonnee);
+			c.beingCloned = true;
+			for (Entite e : this.entites) {
+				c.ajouterEntite((Entite) e.clone(plateau));
+			}
+			c.beingCloned = false;
+			return c;
 		}
-		return c;
+		else {
+			return this;
+		}
 	}
 	
 	/**
@@ -80,7 +88,7 @@ public class Case {
 	 * This function returns the first entity of the list
 	 * @return this.entity.get(0)
 	 */
-	public Entite getFirstEntite() {
+	public Entite getPremiereEntite() {
 		return this.entites.get(0);
 	}
 	
@@ -88,17 +96,18 @@ public class Case {
 	 * This function add the entity in argument to the list
 	 * @param e
 	 */
-	public void addEntite(Entite e) {
+	public void ajouterEntite(Entite e) {
 		this.entites.add(e);
+		e.setPosition(this);
 	}
 	
 	/**
 	 * This function remove the entity in argument from the list
 	 * @param e
 	 */
-	public void deleteEntite(Entite e) {
+	public void supprimerEntite(Entite e) {
 		Entite et=null;
-		if (getFirstEntite() == e && !getFirstEntite().equals(e) && !(getFirstEntite() instanceof Dragon)) {
+		if (getPremiereEntite() == e && !getPremiereEntite().equals(e) && !(getPremiereEntite() instanceof Dragon)) {
 				Entite tempEntite = this.entites.get(0);
 				this.entites.add(tempEntite);
 				this.entites.remove(0);
@@ -111,13 +120,12 @@ public class Case {
 			}
 				this.entites.remove(et);
 		}
-		
 	}
 	
 	/**
 	 * Remove all the items on the current Case
 	 */
-	public void deleteAllEntities() {
+	public void vider() {
 		this.entites.clear();
 	}
 	
@@ -160,9 +168,10 @@ public class Case {
 			if (other.entites != null) {
 				return false;
 			}
-		} else if (!entites.equals(other.entites)) {
-			return false;
 		}
+//		else if (!entites.equals(other.entites)) {
+//			return false;
+//		}
 		if (ordonnee != other.ordonnee) {
 			return false;
 		}
@@ -174,7 +183,7 @@ public class Case {
 	 */
 	@Override
 	public String toString() {
-		String str = "Case [x=" + abscisse + ", y=" + ordonnee + ", ";
+		String str = "Case "+ this.getClass().getName() + "@" + Integer.toHexString(this.hashCode()) +" [x=" + abscisse + ", y=" + ordonnee + ", ";
 		for (Entite e : entites) {
 			if (e instanceof Bouclier) { str += "b"; }
 			else if (e instanceof Bourse) { str += "3"; }

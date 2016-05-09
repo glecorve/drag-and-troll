@@ -29,13 +29,8 @@ public class IAAleatoire extends AbstractIA {
     
     @Override
     public Action choisirAction(Jeu j) {
-//        System.out.println(Thread.currentThread().getName()+": "+"-------- choisirAction ---------");
         List<Action> actions = j.listerActionsPossibles();
-        for (Action a : actions) {
-//            System.out.println(Thread.currentThread().getName()+": "+"Action possible : " + a.toString());
-        }
-        Action resultat = actions.get((int) (Math.random() * (actions.size() - 1)));
-//        System.out.println(Thread.currentThread().getName()+": "+"Action calculee = " + resultat.toString());
+        Action resultat = actions.get((int) (Math.random() * (actions.size() - 0.01)));
         return resultat;
     }
 

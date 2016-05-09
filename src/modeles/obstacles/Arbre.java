@@ -2,6 +2,8 @@ package modeles.obstacles;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This class represents the forest object which will be a simple obstacle
  * @author prukev, Brahim
@@ -32,6 +34,13 @@ public class Arbre extends Obstacle {
 		a.copy(this);
 		return a;
 	}
+	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Arbre a = new Arbre(this.myPicture);
+		a.copy(this, plateau);
+		return a;
+	}
 
 	/**
 	 * When the dragon's fire touches a forest, it will be deleted.
@@ -39,7 +48,7 @@ public class Arbre extends Obstacle {
 	@Override
 	public void dragonEffet() {
 		this.myPicture = null;
-		this.position.deleteEntite(this);
+		this.position.supprimerEntite(this);
 	}
 
 	/**

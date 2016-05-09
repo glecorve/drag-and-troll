@@ -2,6 +2,8 @@ package modeles.collectables;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This is the Coin object which gives to the player one point
  * @author prukev, Brahim
@@ -26,20 +28,27 @@ public class Piece extends Objet {
 		this.id = "Piece_" + this.nbCoin;
 		this.nbCoin++;
 	}
-
-	/**
-	 * To string function. 
-	 */
-	@Override
-	public String toString() {
-		return "Coin []";
-	}
 	
 	@Override
 	public Object clone() {
 		Piece p = new Piece(this.myPicture);
 		p.copy(this);
 		return p;
+	}
+	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Piece p = new Piece(this.myPicture);
+		p.copy(this, plateau);
+		return p;
+	}
+
+	/**
+	 * To string function. 
+	 */
+	@Override
+	public String toString() {
+		return "Piece";
 	}
 	
 }

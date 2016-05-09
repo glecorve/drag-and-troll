@@ -114,13 +114,30 @@ public class Troll extends Personnage {
 		return t;
 	}
 	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Troll t = new Troll(this.withoutShield, this.withShield);
+		t.copy(this, plateau);
+		t.bouclier = this.bouclier;
+		t.depart = plateau[this.depart.getAbscisse()][this.depart.getOrdonnee()];
+		t.butin = new ArrayList<Objet>();
+		for (Objet o : this.butin) {
+			t.butin.add((Objet) o.clone(plateau));
+		}
+		t.joueur = this.joueur;
+		t.magie = this.magie;
+		t.score = this.score;
+		t.vies = this.vies;
+		return t;
+	}
+	
 	/**
 	 * This function moves the troll to its first position at the beginning of the game.
 	 */
 	public void retourCaseDepart() {
-		this.position.deleteEntite(this);
+		this.position.supprimerEntite(this);
 		this.position = depart;
-		this.position.addEntite(this);
+		this.position.ajouterEntite(this);
 		if(this.vies>0){
 			this.vies--;
 		}
@@ -138,7 +155,7 @@ public class Troll extends Personnage {
 	 * Function updating the score
 	 * @param bonus
 	 */
-	public void addScore(int bonus) {
+	public void augmenterScore(int bonus) {
 		this.score += bonus;
 	}
 	
@@ -146,7 +163,7 @@ public class Troll extends Personnage {
 	 * Function updating the life points
 	 * @param bonus
 	 */
-	public void addLife(int bonus) {
+	public void augmenterVies(int bonus) {
 		if(this.vies < 3){
 			this.vies += bonus;
 		}
@@ -155,7 +172,7 @@ public class Troll extends Personnage {
 	/**
 	 * Function used when the troll picks up an item on the same position this items are added into this troll incomes
 	 */
-	public void addItem() {
+	public void ajouterObjet() {
 		ArrayList<Entite> list = this.position.getEntites();
 		if (list.get(0) != null && list.get(0) instanceof Objet) {
 			Objet it = (Objet)list.get(0);
@@ -214,7 +231,7 @@ public class Troll extends Personnage {
 		if (score != other.score) {
 			return false;
 		}
-		if (id != other.id) {
+		if (!id.equals(other.id)) {
 			return false;
 		}
 		return true;
@@ -225,7 +242,7 @@ public class Troll extends Personnage {
 	 */
 	@Override
 	public String toString() {
-		return "Troll [id=" + id + ", score=" + score + ", nbLifes=" + vies + ", magie=" + magie + ", depart=" + depart + ", actuelle=" + position
+		return "Troll "+Integer.toHexString(this.hashCode())+" [id=" + id + ", score=" + score + ", nbLifes=" + vies + ", magie=" + magie + ", depart=" + depart + ", actuelle=" + position
 				+ ", joueur=" + joueur + ", bouclier=" + bouclier + "]";
 	}
 
@@ -311,9 +328,18 @@ public class Troll extends Personnage {
 	 * Function adding magic points
 	 * @param bonus
 	 */
-	public void addMagie(int bonus) {
+	public void augmenterMagie(int bonus) {
 		if(this.magie < 2){
 			this.magie += bonus;
+		}
+	}
+	
+	/**
+	 * Decrement magic points
+	 */
+	public void diminuerMagie() {
+		if(this.magie > 0){
+			this.magie--;
 		}
 	}
 
@@ -337,7 +363,7 @@ public class Troll extends Personnage {
 	 * This function is used when a troll picks up a shield
 	 * @param bonus
 	 */
-	public void addBouclier(int bonus) {
+	public void ajouterBouclier(int bonus) {
 		if(this.bouclier < 1){
 			this.bouclier += bonus;
 			this.myPicture = this.withShield;

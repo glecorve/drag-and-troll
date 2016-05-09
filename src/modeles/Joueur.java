@@ -64,6 +64,28 @@ public class Joueur {
 	}
 	
 	/**
+	 * Clone tout sauf les cases
+	 * 
+	 * @return un nouveau joueur
+	 */
+	public Joueur clone(Case[][] plateau) {
+		Joueur clone = new Joueur(this.nom, (Troll) this.troll.clone(plateau));
+		clone.couleur = this.couleur;
+		return clone;
+	}
+	
+	/**
+	 * Clone tout sauf les cases et le troll
+	 * 
+	 * @return un nouveau joueur
+	 */
+	public Joueur clone(Case[][] plateau, Troll t) {
+		Joueur clone = new Joueur(this.nom, t);
+		clone.couleur = this.couleur;
+		return clone;
+	}
+	
+	/**
 	 * Fixe le nom du joueur
 	 * @param nom String
 	 */
@@ -85,7 +107,7 @@ public class Joueur {
 
 	@Override
 	public String toString() {
-		return getClass().toString() + " " + getNom() + " =\n"
+		return getClass().toString() + " " + getNom() + " (" + Integer.toHexString(this.hashCode()) + ") =\n"
 				+ "\tTroll = " + (this.getTroll() == null?"aucun":getTroll().toString());
 	}
 
@@ -129,20 +151,13 @@ public class Joueur {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (obj instanceof Joueur) {
+			Joueur other = (Joueur) obj;
+			return (couleur.equals(other.couleur)) && (nom.equals(other.nom));
+		}
+		else {
 			return false;
-		Joueur other = (Joueur) obj;
-		if (couleur == null) {
-			if (other.couleur != null)
-				return false;
-		} else if (!couleur.equals(other.couleur))
-			return false;
-		if (nom == null) {
-			if (other.nom != null)
-				return false;
-		} else if (!nom.equals(other.nom))
-			return false;
-		return true;
+		}
 	}
 
 }

@@ -32,7 +32,14 @@ public abstract class Personnage extends Entite {
 		super.copy(p);
 		this.deplacementMax = p.deplacementMax;
 		this.deplacementActuel = p.deplacementActuel;
-		this.previousPosition = (p.previousPosition == null?null:(Case) p.previousPosition.clone());
+		this.previousPosition = (Case) (p.previousPosition == null?null:p.previousPosition.clone());
+	}
+	
+	protected void copy(Personnage p, Case[][] plateau) {
+		super.copy(p, plateau);
+		this.deplacementMax = p.deplacementMax;
+		this.deplacementActuel = p.deplacementActuel;
+		this.previousPosition = (p.previousPosition == null?null:plateau[p.previousPosition.getAbscisse()][p.previousPosition.getOrdonnee()]);
 	}
 	
 	/**
@@ -43,8 +50,8 @@ public abstract class Personnage extends Entite {
 	public void deplacer(Case newCase) {
 		if (this.deplacementActuel < this.deplacementMax) {
 			this.previousPosition = this.position;
-			this.position.deleteEntite(this);
-			newCase.addEntite(this);
+			this.position.supprimerEntite(this);
+			newCase.ajouterEntite(this);
 			this.position = newCase;
 			this.deplacementActuel++;
 		}
@@ -61,9 +68,9 @@ public abstract class Personnage extends Entite {
 	 * This function allows the dragon to go back to his previous position when the turn finishes
 	 * on an Obstacle.
 	 */
-	public void turnBack() {
-		this.position.deleteEntite(this);
-		this.previousPosition.addEntite(this);
+	public void revenirEnArriere() {
+		this.position.supprimerEntite(this);
+		this.previousPosition.ajouterEntite(this);
 		this.position = this.previousPosition;
 	}
 	
@@ -77,13 +84,18 @@ public abstract class Personnage extends Entite {
 	public boolean detecteCollision(Case c) {
 		if (this instanceof Dragon) {
 			return (this.deplacementActuel == 1 && 
-					!c.getEntites().isEmpty() && c.getFirstEntite() instanceof Obstacle );
+					!c.getEntites().isEmpty() && c.getPremiereEntite() instanceof Obstacle );
 		} else {
-			return (!c.getEntites().isEmpty() && c.getFirstEntite() instanceof Obstacle );
+			return (!c.getEntites().isEmpty() && c.getPremiereEntite() instanceof Obstacle );
 		}
 		
 	}
 	
+	/**
+	 * List of board square which can be reached by the current character
+	 * @param plateau
+	 * @return
+	 */
 	public List<Case> listerCasesAtteignables(Case[][] plateau) {
 		List<Case> casesAtteignables = new ArrayList<Case>();
 		int xInit = getPosition().getAbscisse();

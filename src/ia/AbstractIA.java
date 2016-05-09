@@ -41,7 +41,7 @@ public abstract class AbstractIA extends Joueur {
      *
      * @param coup Le coup a memoriser
      */
-    public final void memoriseCoup(Action action) {
+    public final void memoriserAction(Action action) {
         if (action != null) {
             actionMemorisee = (Action) action.clone();
 //            System.out.println("##############################");
@@ -59,6 +59,6 @@ public abstract class AbstractIA extends Joueur {
      * @param p Partie en cours
      * @return une action
      */
-    public abstract Action choisirAction(Jeu p);
+    public abstract Action choisirAction(Jeu j);
 
 }

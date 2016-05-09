@@ -2,6 +2,8 @@ package modeles.collectables;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This is the Bourse object which gives to the player three points
  * @author prukev, Brahim
@@ -39,6 +41,13 @@ public class Bourse extends Objet {
 	public Object clone() {
 		Bourse b = new Bourse(this.myPicture);
 		b.copy(this);
+		return b;
+	}
+
+	@Override
+	public Object clone(Case[][] plateau) {
+		Bourse b = new Bourse(this.myPicture);
+		b.copy(this, plateau);
 		return b;
 	}
 	

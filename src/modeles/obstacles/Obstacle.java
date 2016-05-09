@@ -1,6 +1,7 @@
 
 package modeles.obstacles;
 
+import modeles.Case;
 import modeles.Entite;
 
 /**
@@ -17,6 +18,11 @@ public abstract class Obstacle extends Entite {
 	
 	protected void copy(Obstacle o) {
 		super.copy(o);
+		this.difficulty = o.difficulty;
+	}
+	
+	protected void copy(Obstacle o, Case[][] plateau) {
+		super.copy(o, plateau);
 		this.difficulty = o.difficulty;
 	}
 	

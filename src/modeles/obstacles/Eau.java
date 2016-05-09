@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import javax.swing.ImageIcon;
 
+import modeles.Case;
+
 /**
  * This class represents the water object which will be a little stronger than a forest
  * @author prukev, Brahim
@@ -32,6 +34,13 @@ public class Eau extends Obstacle {
 	public Object clone() {
 		Eau e = new Eau(this.myPicture);
 		e.copy(this);
+		return e;
+	}
+	
+	@Override
+	public Object clone(Case[][] plateau) {
+		Eau e = new Eau(this.myPicture);
+		e.copy(this, plateau);
 		return e;
 	}
 	
