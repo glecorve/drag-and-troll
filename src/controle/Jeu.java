@@ -413,10 +413,9 @@ public class Jeu {
 		// We execute the operation only if the dragon was the selected character
 		for (Dragon d : dragonList) {
 
-			if (d.getEtat() instanceof Eveille) {
+			if (d.estEveille()) {
 				// We get all the Cases around the dragon
-				List<Case[]> directions = ((Dragon) this.personnageSelectionne)
-						.getZoneFeu(limite, this);
+				List<Case[]> directions = d.getZoneFeu(limite, this);
 				List<Case[]> directionsAvecTroll = new ArrayList<Case[]>();
 				// Check if a troll is in the fire area
 				for (Troll t : trollList) {
@@ -437,6 +436,8 @@ public class Jeu {
 				// We successively check each case
 				for (int i = 0; i < directionsAvecTroll.size(); i++) {
 					for (int j = 0; j < directionsAvecTroll.get(i).length; j++) {
+						
+						System.out.println("BRULE "+directionsAvecTroll.get(i)[j]);
 						/*
 						 * We look if there is a rock in the order of
 						 * verification. If there is, we stop the analysis.
@@ -652,6 +653,7 @@ public class Jeu {
 			t = new Troll(this.trollIcon[i], this.trollIcon[4 + i]);
 			t.setJoueur(i);
 			t.setScore(i);
+			t.augmenterMagie(1);
 			joueurs.get(i).setTroll(t);
 			this.scoreMax += i;
 			this.ajouterEntite(t, currentX, currentY);
