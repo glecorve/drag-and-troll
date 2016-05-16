@@ -91,16 +91,10 @@ public class JeuIHM extends JFrame {
 	 * This panel will be use in order to show all the data of the game
 	 */
 	private JPanel playersInfo = new JPanel();
+	
+	private java.util.List<JoueurIHM> vuesJoueurs = new LinkedList<JoueurIHM>();
 
-	/**
-	 * This panel will display the table of scores
-	 */
 	private JPanel playersTable = new JPanel();
-
-	/**
-	 * This table label will contain a lot of the informations
-	 */
-	private JLabel[][] playerTablePanel;
 
 	/**
 	 * Name of first column for players data
@@ -112,12 +106,11 @@ public class JeuIHM extends JFrame {
 	 */
 	private JButton depart = new JButton();
 
-	Images DeIcon = new Images();
 	/**
 	 * This is the table which contains all the icons of dice
 	 */
-	private ImageIcon[] des = { DeIcon.getDe1(), DeIcon.getDe2(),
-			DeIcon.getDe3(), DeIcon.getDe4(), DeIcon.getDe5(), DeIcon.getDe6() };
+	private ImageIcon[] des = { Images.getDe1(), Images.getDe2(),
+			Images.getDe3(), Images.getDe4(), Images.getDe5(), Images.getDe6() };
 
 	/**
 	 * This label will display a little message for the players
@@ -157,7 +150,6 @@ public class JeuIHM extends JFrame {
 		plateauIHM = game.getPlateau(); // We get the game's table
 		this.setSize(1000, 800); //
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 		game.genererPlateauAleatoire();
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		drawGame();
@@ -234,8 +226,6 @@ public class JeuIHM extends JFrame {
 
 		// We create a table for the display with the limit of the game's table
 		this.plateauJPanel = new JButton[getTaillePlateau()][getTaillePlateau()];
-
-		this.playerTablePanel = new JLabel[5][Jeu.getNombreJoueurs() + 1];
 
 		// We set the layout into a gridlayout. More easy to have a table
 		gamePanel.setLayout(new GridLayout(getTaillePlateau() + 1, this
@@ -576,67 +566,24 @@ public class JeuIHM extends JFrame {
 
 		playersInfo.setLayout(new BorderLayout());
 
-		playersTable.setLayout(new GridLayout(5, Jeu.getNombreJoueurs()));
-
-		JLabel panTemp;
-
-		// Attribution of the first column :
-		for (int i = 0; i < this.dataList.length; ++i) {
-			panTemp = new JLabel();
-			panTemp.setText(this.dataList[i]);
-			this.playerTablePanel[i][0] = panTemp;
-		}
-
-		// Creation of the first line of the player's table
-		for (int i = 1; i <= Jeu.getNombreJoueurs(); ++i) {
-			panTemp = new JLabel();
-			panTemp.setText(joueurNom[i - 1] + " ");
-			this.playerTablePanel[0][i] = panTemp;
-		}
-
-		// Fill of the table
-		for (int j = 1; j <= Jeu.getNombreJoueurs(); ++j) {
-			Troll t = game.chercherTroll("Troll_" + j);
-			panTemp = new JLabel();
-			panTemp.setText("" + t.getScore());
-
-			// Insertion of all scores
-			this.playerTablePanel[1][j] = panTemp;
-
-			panTemp = new JLabel();
-			panTemp.setText("" + t.getVies());
-
-			// Insertion of all life points
-			this.playerTablePanel[2][j] = panTemp;
-
-			panTemp = new JLabel();
-			panTemp.setText("" + t.getMagie());
-
-			// Insertion of all magic points
-			this.playerTablePanel[3][j] = panTemp;
-
-			panTemp = new JLabel();
-			panTemp.setText("" + t.getBouclier());
-
-			// Insertion of all shield
-			this.playerTablePanel[4][j] = panTemp;
-		}
-
-		for (int i = 0; i < 5; ++i) {
-			for (int j = 0; j <= Jeu.getNombreJoueurs(); ++j) {
-				playersTable.add(this.playerTablePanel[i][j]);
-			}
-		}
+		playersTable.setLayout(new GridLayout(2, (Jeu.getNombreJoueurs()+1)/2));
 
 		inforTurnPlay
 				.setText("Score a atteindre >= " + game.getScoreVictoire());
-		playersInfo.add(playersTable, BorderLayout.NORTH);
+		inforTurnPlay.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 		playersInfo.add(inforTurnPlay, BorderLayout.EAST);
 		if (game.onDiceMode())
 			playersInfo.add(de, BorderLayout.SOUTH);
 		if (game.onDiceMode())
 			dice.setIcon(des[0]);
 		playersInfo.add(dice, BorderLayout.CENTER);
+		for (Joueur j : game.getJoueurs()) {
+			JoueurIHM vue = new JoueurIHM(j);
+			vuesJoueurs.add(vue);
+			playersTable.add(vue);
+		}
+		playersInfo.add(playersTable, BorderLayout.NORTH);
+		playersInfo.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		jeu.add(playersInfo, BorderLayout.EAST);
 	}
 
@@ -726,18 +673,11 @@ public class JeuIHM extends JFrame {
 		}
 		if (game.getPersonnageSelectionne() instanceof Dragon)
 			selection.setText("Personnage: Dragon");
-		Troll t;
-		for (int j = 0; j < Jeu.getNombreJoueurs(); ++j) {
-			Joueur joueur = game.getJoueurs().get(j);
-			t = joueur.getTroll();
-			if (t != null) {
-				this.playerTablePanel[1][j+1].setText("" + t.getScore());
-				this.playerTablePanel[2][j+1].setText("" + t.getVies());
-				this.playerTablePanel[3][j+1].setText("" + t.getMagie());
-				this.playerTablePanel[4][j+1].setText("" + t.getBouclier());
-			}
+		
+		for (JoueurIHM vue : vuesJoueurs) {
+			vue.redraw();
 		}
-
+		
 		this.nbTurns.setText("Tour : " + game.getNumeroTour());
 	}
 
@@ -774,11 +714,11 @@ public class JeuIHM extends JFrame {
 	 * winner
 	 */
 	public void displayWinner() {
-		String msg = "<html><b>Joueur "+game.getIndiceJoueurCourant()
+		String msg = "<html><b>Joueur "+(game.getIndiceJoueurCourant()+1)
 					+" ("+game.getJoueurCourant().getNom()+")</b> gagne la partie !<br><br>";
 		msg += "Scores : <br>";
 		for (int i = 0; i < game.getJoueurs().size(); i++) {
-			msg += " - Joueur "+i+" ("+game.getJoueurs().get(i).getNom()+") = "
+			msg += " - Joueur "+(i+1)+" ("+game.getJoueurs().get(i).getNom()+") = "
 					+game.getJoueurs().get(i).getScore()
 					+" point"+(game.getJoueurs().get(i).getScore()>1?"s":"")+"<br>";
 		}

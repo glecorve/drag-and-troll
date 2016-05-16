@@ -14,13 +14,12 @@ public class Joueur {
 	private Troll troll = null;
 	private Color couleur;
 
-	private static final Color couleurs[] = { new Color(20, 130, 255),
-			new Color(255, 90, 90), new Color(130, 20, 255),
-			new Color(255, 20, 130), new Color(20, 255, 130),
-			new Color(255, 130, 20), new Color(200, 20, 200),
-			new Color(200, 200, 20), new Color(20, 200, 200),
-			new Color(130, 255, 20), new Color(90, 90, 255),
-			new Color(90, 255, 90) };
+	private static final Color couleurs[] = {
+			new Color(255, 153, 153),
+			new Color(93, 143, 255),
+			new Color(213, 212, 64),
+			new Color(98, 242, 3)
+			};
 	private static int couleurIterateur = -1;
 
 	private static Color getCouleurSuivante() {
@@ -121,6 +120,14 @@ public class Joueur {
 	 */
 	public void setTroll(Troll t) {
 		troll = t;
+	}
+	
+	/**
+	 * Get the color of the current player
+	 * @return A color
+	 */
+	public Color getCouleur() {
+		return couleur;
 	}
 
 	/**

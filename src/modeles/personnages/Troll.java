@@ -26,7 +26,17 @@ public class Troll extends Personnage {
 	/**
 	 * Maximum number of moves for any troll
 	 */
-	private static final int DEPLACEMENT_MAX_TROLL = 1;
+	public static final int DEPLACEMENT_MAX = 1;
+	
+	/**
+	 * Maximum number of lifes for any troll
+	 */
+	public static final int VIES_MAX = 2;
+	
+	/**
+	 * Maximum number of magic points for any troll
+	 */
+	public static final int MAGIE_MAX = 2;
 
 	/**
 	 * Each troll has a score for the concerned player
@@ -89,9 +99,9 @@ public class Troll extends Personnage {
 		this.withoutShield = img;
 		this.withShield = shield;
 		this.score = 0;
-		this.vies = 3;
+		this.vies = VIES_MAX;
 		this.magie = 0;
-		this.deplacementMax = DEPLACEMENT_MAX_TROLL;
+		this.deplacementMax = DEPLACEMENT_MAX;
 		this.id = "Troll_" + this.nbTrolls;
 		this.nbTrolls++;
 		this.bouclier = 0;
@@ -164,7 +174,7 @@ public class Troll extends Personnage {
 	 * @param bonus
 	 */
 	public void augmenterVies(int bonus) {
-		if(this.vies < 3){
+		if(this.vies < VIES_MAX){
 			this.vies += bonus;
 		}
 	}
@@ -176,8 +186,8 @@ public class Troll extends Personnage {
 		ArrayList<Entite> list = this.position.getEntites();
 		if (list.get(0) != null && list.get(0) instanceof Objet) {
 			Objet it = (Objet)list.get(0);
-			if ((it instanceof Coeur && compterCoeurs() < 3) || (it instanceof Bouclier && 
-					compterBoucliers() <1) || (it instanceof Cristal && compterCristaux() < 2) || 
+			if ((it instanceof Coeur && compterCoeurs() < VIES_MAX) || (it instanceof Bouclier && 
+					compterBoucliers() <1) || (it instanceof Cristal && compterCristaux() < MAGIE_MAX) || 
 					it instanceof Piece || it instanceof Bourse) {
 				    butin.add(it);
 				    list.remove(it);
@@ -329,7 +339,7 @@ public class Troll extends Personnage {
 	 * @param bonus
 	 */
 	public void augmenterMagie(int bonus) {
-		if(this.magie < 2){
+		if(this.magie < MAGIE_MAX){
 			this.magie += bonus;
 		}
 	}
@@ -349,6 +359,14 @@ public class Troll extends Personnage {
 	 */
 	public int getBouclier() {
 		return this.bouclier;
+	}
+	
+	/**
+	 * Test if the current troll has a shield
+	 * @return true if the current troll has a shield
+	 */
+	public boolean possedeBouclier() {
+		return (this.bouclier > 0);
 	}
 
 	/**

@@ -35,11 +35,6 @@ import images.Images;
  */
 public class Jeu {
 
-	/**
-	 * Game icons images
-	 */
-	Images images = new Images();
-	
 	static JFrame test = new JFrame();
 	
 	/**
@@ -138,11 +133,11 @@ public class Jeu {
 	/**
 	 * This table will contain all the icons of the trolls
 	 */
-	private ImageIcon[] trollIcon = { images.getTroll1Icon(),
-			images.getTroll2Icon(), images.getTroll3Icon(),
-			images.getTroll4Icon(), images.getTroll1ShieldIcon(),
-			images.getTroll2ShieldIcon(), images.getTroll3ShieldIcon(),
-			images.getTroll4ShieldIcon() };
+	private static ImageIcon[] trollIcon = { Images.getTroll1Icon(),
+		Images.getTroll2Icon(), Images.getTroll3Icon(),
+		Images.getTroll4Icon(), Images.getTroll1ShieldIcon(),
+		Images.getTroll2ShieldIcon(), Images.getTroll3ShieldIcon(),
+		Images.getTroll4ShieldIcon() };
 
 	/**
 	 * This is the constructor.
@@ -163,7 +158,7 @@ public class Jeu {
 		
 		this.joueurs = new ArrayList<Joueur>(nombreJoueurs);
 		for (int i = 0; i < nombreJoueurs; i++) {
-			this.joueurs.add(new Joueur("Joueur "+i));
+			this.joueurs.add(new Joueur("Joueur "+(i+1)));
 		}
 
 //		if (nombreJoueurs > 3 || Jeu.taillePlateau > 9) {
@@ -180,8 +175,6 @@ public class Jeu {
 	 * @param aCopier Instance to be copied 
 	 */
 	public Jeu(Jeu aCopier) {
-		
-		this.images = aCopier.images;
 		
 		// The table will be a table of table size of the argument
 		this.plateau = new Case[taillePlateau][taillePlateau];		
@@ -498,11 +491,11 @@ public class Jeu {
 		int l = (int) (Math.random() * taillePlateau - 1);
 		if (plateau[l][c].getEntites().isEmpty()) {
 			if (l == taillePlateau % 2) {
-				i = new Bourse(images.getBourseIcon());
+				i = new Bourse(Images.getBourseIcon());
 				i.setPosition(new Case(l, c));
 				this.scoreMax += i.getBonus();
 			} else {
-				i = new Piece(images.getCoinIcon());
+				i = new Piece(Images.getCoinIcon());
 				i.setPosition(new Case(l, c));
 				this.scoreMax += i.getBonus();
 			}
@@ -548,8 +541,8 @@ public class Jeu {
 	public void genererPlateauFixe() {
 		Dragon d;
 		for (int i = 0; i < this.nombreDragons; ++i) {
-			d = new Dragon(images.getDragonSleepingIcon(),
-					images.getDragonIcon());
+			d = new Dragon(Images.getDragonSleepingIcon(),
+					Images.getDragonIcon());
 			// This equation allows to put one drogon near coins and the other
 			// one near the shields
 			this.ajouterEntite(d, i * 7, 7 - 6 * i);
@@ -567,36 +560,36 @@ public class Jeu {
 				t.setDeplacementMax(0);
 		}
 
-		Rocher r1 = new Rocher(images.getRockIcon());
-		Rocher r2 = new Rocher(images.getRockIcon());
-		Rocher r3 = new Rocher(images.getRockIcon());
-		Rocher r4 = new Rocher(images.getRockIcon());
-		Rocher r5 = new Rocher(images.getRockIcon());
-		Rocher r6 = new Rocher(images.getRockIcon());
-		Eau w1 = new Eau(images.getWaterIcon());
-		Eau w2 = new Eau(images.getWaterIcon());
-		Arbre f1 = new Arbre(images.getForestIcon());
-		Arbre f2 = new Arbre(images.getForestIcon());
-		Arbre f3 = new Arbre(images.getForestIcon());
-		Arbre f4 = new Arbre(images.getForestIcon());
-		Arbre f5 = new Arbre(images.getForestIcon());
-		Arbre f6 = new Arbre(images.getForestIcon());
-		Piece c1 = new Piece(images.getCoinIcon());
-		Piece c2 = new Piece(images.getCoinIcon());
-		Piece c3 = new Piece(images.getCoinIcon());
-		Piece c4 = new Piece(images.getCoinIcon());
-		Piece c5 = new Piece(images.getCoinIcon());
-		Piece c6 = new Piece(images.getCoinIcon());
-		Bourse b1 = new Bourse(images.getBourseIcon());
-		Bourse b2 = new Bourse(images.getBourseIcon());
-		Cristal cr1 = new Cristal(images.getCristalIcon());
-		Cristal cr2 = new Cristal(images.getCristalIcon());
-		Coeur co1 = new Coeur(images.getHeartIcon());
-		Coeur co2 = new Coeur(images.getHeartIcon());
-		Coeur co3 = new Coeur(images.getHeartIcon());
-		Bouclier bo1 = new Bouclier(images.getShieldIcon());
-		Bouclier bo2 = new Bouclier(images.getShieldIcon());
-		Bouclier bo3 = new Bouclier(images.getShieldIcon());
+		Rocher r1 = new Rocher(Images.getRockIcon());
+		Rocher r2 = new Rocher(Images.getRockIcon());
+		Rocher r3 = new Rocher(Images.getRockIcon());
+		Rocher r4 = new Rocher(Images.getRockIcon());
+		Rocher r5 = new Rocher(Images.getRockIcon());
+		Rocher r6 = new Rocher(Images.getRockIcon());
+		Eau w1 = new Eau(Images.getWaterIcon());
+		Eau w2 = new Eau(Images.getWaterIcon());
+		Arbre f1 = new Arbre(Images.getForestIcon());
+		Arbre f2 = new Arbre(Images.getForestIcon());
+		Arbre f3 = new Arbre(Images.getForestIcon());
+		Arbre f4 = new Arbre(Images.getForestIcon());
+		Arbre f5 = new Arbre(Images.getForestIcon());
+		Arbre f6 = new Arbre(Images.getForestIcon());
+		Piece c1 = new Piece(Images.getCoinIcon());
+		Piece c2 = new Piece(Images.getCoinIcon());
+		Piece c3 = new Piece(Images.getCoinIcon());
+		Piece c4 = new Piece(Images.getCoinIcon());
+		Piece c5 = new Piece(Images.getCoinIcon());
+		Piece c6 = new Piece(Images.getCoinIcon());
+		Bourse b1 = new Bourse(Images.getBourseIcon());
+		Bourse b2 = new Bourse(Images.getBourseIcon());
+		Cristal cr1 = new Cristal(Images.getCristalIcon());
+		Cristal cr2 = new Cristal(Images.getCristalIcon());
+		Coeur co1 = new Coeur(Images.getHeartIcon());
+		Coeur co2 = new Coeur(Images.getHeartIcon());
+		Coeur co3 = new Coeur(Images.getHeartIcon());
+		Bouclier bo1 = new Bouclier(Images.getShieldIcon());
+		Bouclier bo2 = new Bouclier(Images.getShieldIcon());
+		Bouclier bo3 = new Bouclier(Images.getShieldIcon());
 		this.ajouterEntite(cr1, 4, 0);
 		this.ajouterEntite(cr2, 7, 7);
 		this.ajouterEntite(co1, 6, 7);
@@ -665,13 +658,13 @@ public class Jeu {
 					int type = (int) (Math.random() * 5);
 					switch (type) {
 					case 0: // Rock
-						this.ajouterEntite(new Rocher(images.getRockIcon()), i, j);
+						this.ajouterEntite(new Rocher(Images.getRockIcon()), i, j);
 						break;
 					case 1: // Water
-						this.ajouterEntite(new Eau(images.getWaterIcon()), i, j);
+						this.ajouterEntite(new Eau(Images.getWaterIcon()), i, j);
 						break;
 					default: // Forest
-						this.ajouterEntite(new Arbre(images.getForestIcon()), i, j);
+						this.ajouterEntite(new Arbre(Images.getForestIcon()), i, j);
 						break;
 					}
 				}
@@ -717,38 +710,38 @@ public class Jeu {
 				int type = (int) (Math.random() * 100);
 				// Coin
 				if (type >= 0 && type < 60) {
-					this.ajouterEntite(new Piece(images.getCoinIcon()), currentX,
+					this.ajouterEntite(new Piece(Images.getCoinIcon()), currentX,
 							currentY);
 					remaining--;
 				}
 				// Bourse
 				else if (type >= 60 && type < 70) {
-					this.ajouterEntite(new Bourse(images.getBourseIcon()),
+					this.ajouterEntite(new Bourse(Images.getBourseIcon()),
 							currentX, currentY);
 					remaining--;
 				}
 				// Cristal
 				else if (type >= 70 && type < 75) {
-					this.ajouterEntite(new Cristal(images.getCristalIcon()),
+					this.ajouterEntite(new Cristal(Images.getCristalIcon()),
 							currentX, currentY);
 					remaining--;
 				}
 				// Heart
 				else if (type >= 75 && type < 80) {
-					this.ajouterEntite(new Coeur(images.getHeartIcon()), currentX,
+					this.ajouterEntite(new Coeur(Images.getHeartIcon()), currentX,
 							currentY);
 					remaining--;
 				}
 				// Dragon
 				else if (type >= 80 && type < 100 && remainingDragons > 0) {
-					this.ajouterEntite(new Dragon(images.getDragonSleepingIcon(),
-							images.getDragonIcon()), currentX, currentY);
+					this.ajouterEntite(new Dragon(Images.getDragonSleepingIcon(),
+							Images.getDragonIcon()), currentX, currentY);
 					remaining--;
 					remainingDragons--;
 				}
 				// Shield
 				else if (type >= 80 && type < 100 && remainingShields > 0) {
-					this.ajouterEntite(new Bouclier(images.getShieldIcon()),
+					this.ajouterEntite(new Bouclier(Images.getShieldIcon()),
 							currentX, currentY);
 					remaining--;
 					remainingShields--;
@@ -1264,14 +1257,6 @@ public class Jeu {
 			plateau[itAbscisse][itOrdonne].getEntites().add(0, it);
 		}
 		troll.setButin(new ArrayList<Objet>());
-	}
-
-	public Images getImages() {
-		return images;
-	}
-
-	public void setImages(Images images) {
-		this.images = images;
 	}
 
 	@Override
