@@ -2,6 +2,7 @@ package vues;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import images.Images;
@@ -21,6 +22,7 @@ public class JoueurIHM extends JPanel {
 	public JoueurIHM(Joueur j) {
 		super();
 		joueur = j;
+		setPreferredSize(new Dimension(350, 200));
 		setBorder(BorderFactory.createLoweredBevelBorder());
 		redraw();
 	}
