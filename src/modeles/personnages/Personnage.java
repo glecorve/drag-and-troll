@@ -42,6 +42,10 @@ public abstract class Personnage extends Entite {
 		this.previousPosition = (p.previousPosition == null?null:plateau[p.previousPosition.getAbscisse()][p.previousPosition.getOrdonnee()]);
 	}
 	
+	public boolean dernierDeplacement() {
+		return (this.deplacementActuel + 1 == this.deplacementMax);
+	}
+	
 	/**
 	 * This function is the moving function of a character. It works by removing a character
 	 * from his position and adding it to the new position
@@ -49,7 +53,9 @@ public abstract class Personnage extends Entite {
 	 */
 	public void deplacer(Case newCase) {
 		if (this.deplacementActuel < this.deplacementMax) {
-			this.previousPosition = this.position;
+			if (!detecteCollision(this.position)) {
+				this.previousPosition = this.position;
+			}
 			this.position.supprimerEntite(this);
 			newCase.ajouterEntite(this);
 			this.position = newCase;
@@ -69,6 +75,7 @@ public abstract class Personnage extends Entite {
 	 * on an Obstacle.
 	 */
 	public void revenirEnArriere() {
+		System.out.println("Back to "+previousPosition);
 		this.position.supprimerEntite(this);
 		this.previousPosition.ajouterEntite(this);
 		this.position = this.previousPosition;
@@ -82,13 +89,7 @@ public abstract class Personnage extends Entite {
 	 * @return true/false
 	 */
 	public boolean detecteCollision(Case c) {
-		if (this instanceof Dragon) {
-			return (this.deplacementActuel == 1 && 
-					!c.getEntites().isEmpty() && c.getPremiereEntite() instanceof Obstacle );
-		} else {
-			return (!c.getEntites().isEmpty() && c.getPremiereEntite() instanceof Obstacle );
-		}
-		
+			return (!c.getEntites().isEmpty() && c.getPremiereEntite() instanceof Obstacle);
 	}
 	
 	/**

@@ -12,12 +12,5 @@ public interface EtatDragon {
 	 * Clone the current instance
 	 */
 	public Object clone();
-	
-	/**
-	 * Interface actual for the two states
-	 * @param newCase
-	 * @param dragon
-	 */
-	public void deplacer(Case newCase, Dragon dragon);
 
 }

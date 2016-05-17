@@ -25,11 +25,21 @@ public class Images {
 	 * This is the icon image of the shield
 	 */
 	private static ImageIcon shieldIcon = new ImageIcon(Images.class.getResource("bouclier.png"));
+	
+	/**
+	 * This is the icon image of the shield
+	 */
+	private static ImageIcon shieldContainerIcon = new ImageIcon(Images.class.getResource("boucliervide.png"));
 
 	/**
 	 * This is the icon image of the cristal
 	 */
 	private static ImageIcon cristalIcon = new ImageIcon(Images.class.getResource("cristal.png"));
+	
+	/**
+	 * This is the icon image of the cristal container
+	 */
+	private static ImageIcon cristalContainerIcon = new ImageIcon(Images.class.getResource("cristalvide.png"));
 
 	/**
 	 * This is the icon image of the bourse
@@ -40,6 +50,11 @@ public class Images {
 	 * This is the icon image of the heart
 	 */
 	private static ImageIcon heartIcon = new ImageIcon(Images.class.getResource("coeur.png"));
+	
+	/**
+	 * This is the icon image of the heart container
+	 */
+	private static ImageIcon heartContainerIcon = new ImageIcon(Images.class.getResource("coeurvide.png"));
 
 	/**
 	 * This is the icon image of the rock
@@ -154,10 +169,26 @@ public class Images {
 
 	/**
 	 * Getter of image icon
+	 * @return the shieldContainerIcon
+	 */
+	public static ImageIcon getShieldContainerIcon() {
+		return shieldContainerIcon;
+	}
+
+	/**
+	 * Getter of image icon
 	 * @return the cristalIcon
 	 */
 	public static ImageIcon getCristalIcon() {
 		return cristalIcon;
+	}
+
+	/**
+	 * Getter of image icon
+	 * @return the cristalContainerIcon
+	 */
+	public static ImageIcon getCristalContainerIcon() {
+		return cristalContainerIcon;
 	}
 
 	/**
@@ -174,6 +205,14 @@ public class Images {
 	 */
 	public static ImageIcon getHeartIcon() {
 		return heartIcon;
+	}
+
+	/**
+	 * Getter of image icon
+	 * @return the heartContainerIcon
+	 */
+	public static ImageIcon getHeartContainerIcon() {
+		return heartContainerIcon;
 	}
 
 	/**

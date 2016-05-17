@@ -19,14 +19,6 @@ public class Endormi implements EtatDragon {
 		return new Endormi();
 	}
 	
-	/**
-	 * 
-	 * No effect if the dragon is sleeping
-	 */
-	public void deplacer(Case newCase, Dragon dragon){
-		
-	}
-	
 	@Override
 	public String toString() {
 		return "Endormi";

@@ -37,10 +37,12 @@ public class Jeu {
 
 	static JFrame test = new JFrame();
 	
+	private static int NOMBRE_TOURS_MAX = 100;
+	
 	/**
 	 * List of all players
 	 */
-	List<Joueur> joueurs;
+	private List<Joueur> joueurs;
 
 	/**
 	 * This list contains all the entities there will be in the game
@@ -146,6 +148,14 @@ public class Jeu {
 	 */
 	public Jeu(int nbCases) {
 		Jeu.taillePlateau = nbCases;// We register the number max of the table
+		NOMBRE_TOURS_MAX = (taillePlateau*(taillePlateau+1))/2;
+		
+		if (taillePlateau >= 11) {
+			nombreDragons = 2;
+		}
+		else {
+			nombreDragons = 1;
+		}
 		
 		// The table will be a table of table size of the argument
 		this.plateau = new Case[nbCases][nbCases];
@@ -279,12 +289,10 @@ public class Jeu {
 				this.plateau[i][j].vider();
 			}
 		}
-		System.out.println("nb joueurs "+nombreJoueurs);
 		for (int i = 0; i < nombreJoueurs; i++) {
 			this.joueurs.get(i).setTroll(null);
 		}
 		
-		System.out.println(this.toString());
 	}
 	
 	/**
@@ -376,6 +384,7 @@ public class Jeu {
 	public void setJoueur(int index, Joueur joueur) {
 		if (index >= 0 && index < joueurs.size()) {
 			joueurs.set(index, joueur);
+			joueur.setIndice(index);
 		}
 	}
 
@@ -631,6 +640,7 @@ public class Jeu {
 		int currentY = (int) (taillePlateau-1)/2;
 		boolean[][] browsedCheck = new boolean[taillePlateau][taillePlateau];
 		List<Point> history = new LinkedList<Point>();
+//		this.scoreMax = 0;
 		// Add trolls
 		Troll t;
 		for (int i = 0; i < this.nombreJoueurs; ++i) {
@@ -677,15 +687,18 @@ public class Jeu {
 		int remainingShields = nombreDragons;
 		double horizontalDirection = 0.0;
 		double verticalDirection = 0.0;
+		int steps = 0;
 		while (remaining > 0) {
 			// Either restart from an already browsed point
-			if (Math.random() < 0.1) {
+			if (steps <= 0 && Math.random() < 0.1) {
 				int chosen = (int) (Math.random() * history.size());
 				chosen = Math.min(history.size() - 1, Math.max(2, chosen - 5));
 				currentX = history.get(chosen).x;
 				currentY = history.get(chosen).y;
-			} else {
-				if (Math.random() > 0.7) {
+			}
+			// or carry on
+			else {
+				if (steps <= 0 && Math.random() > 0.7) {
 					horizontalDirection = horizontalDirection
 							+ (Math.random() * 2 - 1);
 					verticalDirection = verticalDirection
@@ -694,6 +707,7 @@ public class Jeu {
 							Math.max(-1.99, horizontalDirection));
 					verticalDirection = Math.min(1.99,
 							Math.max(-1.99, verticalDirection));
+					steps = 7;
 				}
 				if (verticalDirection > horizontalDirection) {
 					currentX = Math.max(Math.min(currentX
@@ -702,6 +716,7 @@ public class Jeu {
 					currentY = Math.max(Math.min(currentY
 							+ (int) (verticalDirection), taillePlateau - 1), 0);
 				}
+				steps--;
 			}
 			if (!browsedCheck[currentX][currentY]) {
 				this.plateau[currentX][currentY].vider();
@@ -885,7 +900,7 @@ public class Jeu {
 	
 	
 	public boolean deplacementValide(Personnage personnage, Case destination) {
-		return (!personnage.detecteCollision(destination) && !this.termine)		;
+		return (!this.termine && (!personnage.detecteCollision(destination) || !personnage.dernierDeplacement()));
 	}
 	
 	
@@ -955,7 +970,7 @@ public class Jeu {
 		while (getJoueurCourant() instanceof AbstractIA) {
 			jouerIA();
 			finirTour();
-			JeuIHM.getInstance().refresh();
+			JeuIHM.getInstance().rafraichirTout();
 		}
 	}
 	
@@ -1042,95 +1057,101 @@ public class Jeu {
 	 * loop is
 	 */
 	public void finirTour() {
-			if (this.personnageSelectionne != null) {
-				// Move reset if the selected character is not null
-				this.personnageSelectionne.resetDeplacement();
-		
-				if (diceMode) {
-					for (Entite e : listeEntite) {
-						if (e instanceof Personnage) {
-							((Personnage) e).setDeplacementMax(0);
-						}
-					}
-				}
-		
-				if (this.personnageSelectionne instanceof Troll) {
-					Troll t = (Troll) this.personnageSelectionne;
-					if (nombreJoueurs != 0
-							&& t.getScore() >= getScoreVictoire()) {
-						this.termine = true;
-					}
-				}
-		
-				// If a dragon stops its movement on an obstacle
-				if (this.personnageSelectionne.getPosition().getEntites().size() > 1) {
-					for (Entite entite : this.personnageSelectionne.getPosition()
-							.getEntites()) {
-						if (entite instanceof Obstacle) {
-							// We move the dragon to its previous position
-							this.personnageSelectionne.revenirEnArriere();
-						}
+		if (this.personnageSelectionne != null) {
+			// Move reset if the selected character is not null
+			this.personnageSelectionne.resetDeplacement();
+
+			if (diceMode) {
+				for (Entite e : listeEntite) {
+					if (e instanceof Personnage) {
+						((Personnage) e).setDeplacementMax(0);
 					}
 				}
 			}
-		
-			// Time to check if all the awaken dragons go back to sleep
-			for (Dragon d : dragonList) {
-				if (d.estEveille()) {
-					Eveille dA = (Eveille) d.getEtat();
-					if (dA.getNombreToursRestants() == 0) {
-						d.endormir();
-					}
-					else {
-						dA.diminuerToursRestants();
+
+			if (this.personnageSelectionne instanceof Troll) {
+				Troll t = (Troll) this.personnageSelectionne;
+				if (nombreJoueurs != 0 && t.getScore() >= getScoreVictoire()) {
+					this.termine = true;
+				}
+			}
+
+			// If a dragon stops its movement on an obstacle
+			if (this.personnageSelectionne.getPosition().getEntites().size() > 1) {
+				for (Entite entite : this.personnageSelectionne.getPosition()
+						.getEntites()) {
+					if (entite instanceof Obstacle) {
+						// We move the dragon to its previous position
+						this.personnageSelectionne.revenirEnArriere();
 					}
 				}
 			}
-		
-			this.cracherFeu(taillePlateau);// Execution of the dragon fire operation
-		
-			for (Troll t : this.trollList) {
-				if (t.getVies() == 0) {
-					this.listeEntite.remove(t);
-					this.tabRemoveEntite.add(t);
-					this.deletedPlayers.add(t);
+		}
+
+		// Time to check if all the awaken dragons go back to sleep
+		for (Dragon d : dragonList) {
+			if (d.estEveille()) {
+				Eveille dA = (Eveille) d.getEtat();
+				if (dA.getNombreToursRestants() == 0) {
+					d.endormir();
+				} else {
+					dA.diminuerToursRestants();
 				}
 			}
-		
-			for (Entite e : this.tabRemoveEntite) {
-				e.getPosition().supprimerEntite(e);
-				this.trollList.remove(e);
+		}
+
+		this.cracherFeu(taillePlateau);// Execution of the dragon fire operation
+
+		for (Troll t : this.trollList) {
+			if (t.getVies() == 0) {
+				this.listeEntite.remove(t);
+				this.tabRemoveEntite.add(t);
+				this.deletedPlayers.add(t);
 			}
-		
-			this.tabRemoveEntite = new HashSet<Entite>();
-		
-			if ((this.trollList).size() <= 1)
-				this.termine = true;
-		
+		}
+
+		for (Entite e : this.tabRemoveEntite) {
+			e.getPosition().supprimerEntite(e);
+			this.trollList.remove(e);
+		}
+
+		this.tabRemoveEntite = new HashSet<Entite>();
+
+		if ((this.trollList).size() <= 1 || numeroTour >= getNumeroTourMax()) {
+			this.termine = true;
+		}
+
+		if (!termine) {
 			setPersonnageSelectionne(null);// Reset of the selected character
-		
+
 			if (this.indiceJoueurCourant == nombreJoueurs - 1)
 				numeroTour++;
-		
+
 			if (!estTermine())
 				this.indiceJoueurCourant++;
 			while (estHorsJeu(this.indiceJoueurCourant)) {
 				this.indiceJoueurCourant++;
 			}
-		
+
 			if (nombreJoueurs != 0) {
 				// Change of player
-				this.indiceJoueurCourant = this.indiceJoueurCourant % nombreJoueurs;
+				this.indiceJoueurCourant = this.indiceJoueurCourant
+						% nombreJoueurs;
 			}
-				
+
 			// Change of player
 			this.indiceJoueurCourant = this.indiceJoueurCourant % nombreJoueurs;
-		
+
 			// The selected character is the next troll
 			personnageSelectionne = getJoueurCourant().getTroll();
-			
-//			System.out.println(this.toString());
-//			JOptionPane.showMessageDialog(JeuIHM.getInstance(), "hop "+(getJoueurCourant() instanceof AbstractIA));
+
+			// System.out.println(this.toString());
+			// JOptionPane.showMessageDialog(JeuIHM.getInstance(),
+			// "hop "+(getJoueurCourant() instanceof AbstractIA));
+		} else {
+			// Affecter les points restants au vainqueur
+			terminerPartie();
+		}
 
 	}
 
@@ -1149,21 +1170,82 @@ public class Jeu {
 	}
 
 	/**
-	 * NbTurn getter
+	 * numeroTour getter
 	 * 
-	 * @return nbTurns
+	 * @return numeroTour
 	 */
 	public int getNumeroTour() {
 		return numeroTour;
 	}
+	
+	/**
+	 * NOMBRE_TOURS_MAX getter
+	 * @return NOMBRE_TOURS_MAX
+	 */
+	public int getNumeroTourMax() {
+		return NOMBRE_TOURS_MAX;
+	}
+	
+	/**
+	 * Test if a given player is currently winning (potentially with an other player)
+	 * @param j A player
+	 * @return True if the player is winning
+	 */
+	public boolean estEnTete(Joueur j) {
+		boolean enTete = (j.getTroll().getVies() > 0);
+		for (Joueur autre : getJoueurs()) {
+			if (autre.getTroll().getVies() > 0 && !autre.equals(j) && autre.getScore() > j.getScore()) {
+				enTete = false;
+			}
+		}
+		return enTete;
+	}
 
 	/**
-	 * Getter of termine.
+	 * Getter of termine
 	 * 
 	 * @return True if the game is over.
 	 */
 	public boolean estTermine() {
 		return termine;
+	}
+	
+	/**
+	 * Look for the winners
+	 * @return A list of winning players
+	 */
+	public List<Joueur> chercherVainqueurs() {
+		List<Joueur> vainqueurs = new LinkedList<Joueur>();
+		for (Joueur j : getJoueurs()) {
+			if (estEnTete(j)) {
+				vainqueurs.add(j); 
+			}
+		}
+		return vainqueurs;
+	}
+	
+	/**
+	 * Compute the remaining score on the board
+	 * @return A positive or null integer
+	 */
+	public int calculerScoreRestant() {
+		int scoreRestant = getScoreMax();
+		for (Joueur j : getJoueurs()) {
+			scoreRestant -= j.getScore();
+		}
+		return scoreRestant;
+	}
+	
+	/**
+	 * Set scores when the game is over
+	 */
+	private void terminerPartie() {
+		int scoreRestant = calculerScoreRestant();
+		List<Joueur> vainqueurs = chercherVainqueurs();
+		int bonusParVainqueur = (vainqueurs.isEmpty() ? 0 : scoreRestant / vainqueurs.size());
+		for (Joueur j : vainqueurs) {
+			j.getTroll().augmenterScore(bonusParVainqueur);
+		}
 	}
 
 	/**

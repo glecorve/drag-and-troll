@@ -89,7 +89,10 @@ public class Case {
 	 * @return this.entity.get(0)
 	 */
 	public Entite getPremiereEntite() {
-		return this.entites.get(0);
+		if (!entites.isEmpty()) {
+			return this.entites.get(0);
+		}
+		return null;
 	}
 	
 	/**

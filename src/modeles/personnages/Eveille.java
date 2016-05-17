@@ -34,19 +34,6 @@ public class Eveille implements EtatDragon {
 	public Object clone() {
 		return new Eveille();
 	}
-	
-	/**
-	 * This function will be called only if the dragon is awake
-	 */
-	public void deplacer(Case newCase, Dragon dragon){
-			if (dragon.deplacementActuel < dragon.deplacementMax) {
-				dragon.previousPosition = dragon.getPosition();
-				dragon.getPosition().supprimerEntite(dragon);
-				newCase.ajouterEntite(dragon);
-				dragon.setPosition(newCase);
-				dragon.deplacementActuel++;
-			}
-	}
 
 	/**
 	 * nombreToursRestants getter

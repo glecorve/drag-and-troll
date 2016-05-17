@@ -3,6 +3,9 @@ package vues;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
+
+import javafx.scene.layout.Border;
 
 import javax.swing.*;
 
@@ -28,6 +31,9 @@ import images.Images;
 public class JeuIHM extends JFrame {
 
 	private static final String nomFenetre = "Drag and Troll";
+	
+	private static final Color MAISON = new Color(255, 202, 155);
+	private static final Color JOUEUR_EN_TETE = Color.YELLOW;
 
 	/**
 	 * The IHM has a variable which represents the game
@@ -51,9 +57,9 @@ public class JeuIHM extends JFrame {
 	private static JeuIHM instance = null;
 
 	/**
-	 * This panel will contain the game
+	 * This panel will contain the board
 	 */
-	private JPanel gamePanel = new JPanel();
+	private JPanel boardPanel = new JPanel();
 
 	/**
 	 * This JPanel is the main panel which will contain the game
@@ -71,15 +77,15 @@ public class JeuIHM extends JFrame {
 	private JLabel selectionJ;
 
 	/**
-	 * This ihm data is used to show the type of the selected character
-	 */
-	private JLabel selection;
-
-	/**
 	 * This ihm data is used to show the number of turns. A turn counts when
 	 * every player has played one time
 	 */
 	private JLabel nbTurns;
+	
+	/**
+	 * This IHM data is used to show the score to reach in order to win
+	 */
+	private JLabel scoreAAtteindre;
 
 	/**
 	 * This panel will contain all the informations needed like who play, which
@@ -111,12 +117,6 @@ public class JeuIHM extends JFrame {
 	 */
 	private ImageIcon[] des = { Images.getDe1(), Images.getDe2(),
 			Images.getDe3(), Images.getDe4(), Images.getDe5(), Images.getDe6() };
-
-	/**
-	 * This label will display a little message for the players
-	 */
-
-	private JLabel inforTurnPlay = new JLabel();
 
 	/**
 	 * This table contains all the names. By default "Joueur x"
@@ -224,124 +224,17 @@ public class JeuIHM extends JFrame {
 	 */
 	public void drawGame() {
 
+		ajouterBarreMenu();
+		
 		// We create a table for the display with the limit of the game's table
 		this.plateauJPanel = new JButton[getTaillePlateau()][getTaillePlateau()];
 
 		// We set the layout into a gridlayout. More easy to have a table
-		gamePanel.setLayout(new GridLayout(getTaillePlateau() + 1, this
-				.getTaillePlateau()));
-		for (int i = 0; i < this.getTaillePlateau(); ++i) {
-			for (int j = 0; j < this.getTaillePlateau(); ++j) {
+		boardPanel.setLayout(new GridLayout(getTaillePlateau(), getTaillePlateau()));
+		for (int i = 0; i < getTaillePlateau(); ++i) {
+			for (int j = 0; j < getTaillePlateau(); ++j) {
 				final Case actualC = plateauIHM[i][j];
 				final JButton panCase = new JButton();
-				panCase.setBackground(Entite.COLOR); // By default, every case
-														// will have the same
-														// background
-				java.util.List<Entite> entites = this.plateauIHM[i][j]
-						.getEntites();
-				if (!entites.isEmpty()
-						&& entites.contains(game.getPersonnageSelectionne())) {
-					panCase.setBorder(BorderFactory.createLineBorder(
-							Color.blue, 2));
-				} else {
-					panCase.setBorder(BorderFactory.createLineBorder(
-							Color.black, 2));
-				}
-				// Draw the background
-				if (!entites.isEmpty()) {
-					panCase.setBackground(entites.get(0).getColor());
-				}
-
-				final ArrayList<Entite> actualList = actualC.getEntites();
-
-				if (!actualList.isEmpty()) {
-					// String name = "";
-					for (Entite entite : actualList) {
-						// name = name + entite.getId() + " ";
-						/*
-						 * //Depending the type of the entity, there will be
-						 * different color if (entite instanceof Forest)
-						 * panCase.setBackground(Color.green); if (entite
-						 * instanceof Water) panCase.setBackground(Color.blue);
-						 * if (entite instanceof Rock)
-						 * panCase.setBackground(Color.darkGray); if (entite
-						 * instanceof Coin || entite instanceof
-						 * Bourse)panCase.setBackground(Color.yellow); if
-						 * (entite instanceof Coeur)
-						 * panCase.setBackground(Color.red); if (entite
-						 * instanceof Cristaux)
-						 * panCase.setBackground(Color.white); if (entite
-						 * instanceof Bouclier)
-						 * panCase.setBackground(Color.pink);
-						 */
-
-						panCase.setIcon(entite.getMyPicture());
-					}
-					// panCase.setText(name);
-				}
-				if (actualC == game.getMaison()) {
-					depart = panCase;
-					panCase.setBackground(Color.pink);
-				}
-
-//				panCase.addMouseListener(new MouseListener() {
-//
-//					@Override
-//					public void mouseReleased(MouseEvent e) {
-//					}
-//
-//					@Override
-//					public void mousePressed(MouseEvent e) {
-//					}
-//
-//					@Override
-//					public void mouseExited(MouseEvent e) {
-//					}
-//
-//					@Override
-//					public void mouseEntered(MouseEvent e) {
-//					}
-//
-//					// This function is used for the selection of a character
-//					@Override
-//					public void mouseClicked(MouseEvent e) {
-//						// If it's the first selection OR the previous selected
-//						// character hasn't move yet
-//						// AND the game is still actif
-//						if (((!actualC.getEntites().isEmpty() && game
-//								.getPersonnageSelectionne() == null) || (!actualC
-//								.getEntites().isEmpty()
-//								&& game.getPersonnageSelectionne() != null && game
-//								.getPersonnageSelectionne()
-//								.getDeplacementActuel() == 0))
-//								&& !game.estTermine()) {
-//
-//							// We look for the character in order to select it
-//							for (Entite entite : actualC.getEntites()) {
-//								if (entite instanceof Personnage) {
-//									Personnage chara = (Personnage) entite;
-//
-//									/*
-//									 * Two differents selection : 1 : If the
-//									 * character is a dragon, awake, and hasn't
-//									 * move yet 2 : If the character is a troll,
-//									 * its player is the actual player
-//									 */
-//									if (chara instanceof Dragon
-//											&& ((Dragon) chara).getEtat() instanceof Eveille
-//											|| chara instanceof Troll
-//											&& ((Troll) chara).getJoueur() == game
-//													.getIndiceJoueurCourant()) {
-//										game.setPersonnageSelectionne(chara);
-//										refresh();
-//									}
-//								}
-//
-//							}
-//
-//						}
-//					}
-//				});
 				
 				panCase.addKeyListener(new KeyListener() {
 
@@ -399,9 +292,10 @@ public class JeuIHM extends JFrame {
 							
 							if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 								game.finirTour();
+								game.demarrerTour();
 							}		
 
-							refresh();
+							rafraichirTout();
 						}
 
 					}
@@ -425,13 +319,13 @@ public class JeuIHM extends JFrame {
 									Dragon chara = game
 											.chercherDragon("Dragon_1");
 									game.setPersonnageSelectionne(chara);
-									refresh();
+									rafraichirTout();
 								}
 							}
 						}
 					}
 				});
-				gamePanel.add(panCase);// Adding of the JButton to the panel
+				boardPanel.add(panCase);// Adding of the JButton to the panel
 
 				/*
 				 * Since we have the system table, we assign each case of the
@@ -441,34 +335,9 @@ public class JeuIHM extends JFrame {
 				this.plateauJPanel[i][j] = panCase;
 			}
 		}
-
-		JButton endTurn = new JButton("End");
-		endTurn.addActionListener(new ActionListener() {
-
-			// This function is used when we end a turn
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				updateBandeau();
-				game.finirTour();
-				if (game.onDiceMode())
-					hasRoll = false;
-				refresh();
-			}
-		});
-
-//		JButton reveillerD = new JButton("Reveiller dragons");
-//		reveillerD.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				Dragon d = game.getDragons().iterator().next();
-//				if (game.peutReveillerDragon(game.getJoueurCourant(), d)) {
-//					game.reveillerDragon(d);
-//					updateBandeau();
-//					refresh();
-//				}
-//			}
-//		});
+		
+		rafraichirBordures();
+		rafraichirPlateau();
 
 		de.addActionListener(new ActionListener() {
 
@@ -486,9 +355,24 @@ public class JeuIHM extends JFrame {
 			}
 		});
 
-		JButton menu = new JButton("Menu");
-		menu.addActionListener(new ActionListener() {
+		jeu.setLayout(new BorderLayout());
+		
+		drawBandeau();
+		boardPanel.setBackground(Color.BLACK);
 
+		jeu.add(boardPanel, BorderLayout.CENTER);
+
+		getContentPane().add(jeu);
+
+	}
+	
+	private void ajouterBarreMenu() {
+		JMenuBar barre = new JMenuBar();
+		barre.setLayout(new FlowLayout(FlowLayout.LEFT));
+		
+		// Menu
+		JMenuItem menu = new JMenuItem("Menu");
+		menu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setVisible(false);
@@ -498,33 +382,41 @@ public class JeuIHM extends JFrame {
 					MenuIHM.getInstance().setVisible(true);
 			}
 		});
-
-		selectionJ = new JLabel("Joueur: "
-				+ joueurNom[game.getIndiceJoueurCourant()]);
-		selection = new JLabel("Personnage:");
-		nbTurns = new JLabel("Tour : 1");
-
-		jeu.setLayout(new BorderLayout());
-
-		drawBandeau();
-
-		gamePanel.add(endTurn);
-		gamePanel.add(menu);
-//		gamePanel.add(reveillerD);
-		gamePanel.setBorder(BorderFactory.createLineBorder(Color.black, 2));
-		infoJeu.setBorder(BorderFactory.createLineBorder(Color.black, 2));
-		infoJeu.add(selectionJ);
-		infoJeu.add(selection);
-		infoJeu.add(nbTurns);
-		jeu.add(infoJeu, BorderLayout.NORTH);
-
-		jeu.add(gamePanel, BorderLayout.CENTER);
-
-		getContentPane().add(jeu);
-
+		barre.add(menu);
+		
+		// Restart
+		JMenuItem recommencer = new JMenuItem("Recommencer");
+		recommencer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				recommencer();
+			}
+		});
+		barre.add(recommencer);
+		
+		// Help
+		JMenuItem aide = new JMenuItem("Aide");
+		aide.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(JeuIHM.getInstance(), "<html>Commandes :<br>" +
+						"- Déplacements : flèches<br>" +
+						"- Fin de tour : espace<br>" +
+						"- Réveiller un dragon : touche numérotée<br><br>" +
+						"Objets :<br>" +
+						"- Pièce : rapporte un point<br>" +
+						"- Bourse : rapporte 3 points<br>" +
+						"- Coeur : ajoute une vie (maximum "+Troll.VIES_MAX+")<br>" +
+						"- Cristal : ajoute un point de magie (maximum "+Troll.MAGIE_MAX+")<br>" +
+						"- Bouclier : confère une protection contre le feu</html>");
+			}
+		});
+		barre.add(aide);
+		
+		this.setJMenuBar(barre);
 	}
 
-	protected void essayerJouerDragon(int dragonIndex) {
+	private void essayerJouerDragon(int dragonIndex) {
 		if (dragonIndex >= 1 && dragonIndex <= game.getDragons().size()) {
 			Dragon d = game.getDragons().get(dragonIndex-1);
 			if (game.peutReveillerDragon(game.getJoueurCourant(), d)) {
@@ -565,32 +457,49 @@ public class JeuIHM extends JFrame {
 	public void drawBandeau() {
 
 		playersInfo.setLayout(new BorderLayout());
+		
+		// Game information
+		infoJeu.setLayout(new GridLayout(3, 1));
+		nbTurns = new JLabel("", JLabel.CENTER);
+		selectionJ = new JLabel("", JLabel.CENTER);
+		scoreAAtteindre = new JLabel("<html><h2>Score a atteindre : "+ game.getScoreVictoire() + "</h2></html>", JLabel.CENTER);
+		infoJeu.add(nbTurns);
+		infoJeu.add(selectionJ);
+		infoJeu.add(scoreAAtteindre);
+		playersInfo.add(infoJeu, BorderLayout.NORTH);
 
+		// Details of players
 		playersTable.setLayout(new GridLayout(2, (Jeu.getNombreJoueurs()+1)/2));
-
-		inforTurnPlay
-				.setText("Score a atteindre >= " + game.getScoreVictoire());
-		inforTurnPlay.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-		playersInfo.add(inforTurnPlay, BorderLayout.EAST);
-		if (game.onDiceMode())
-			playersInfo.add(de, BorderLayout.SOUTH);
-		if (game.onDiceMode())
-			dice.setIcon(des[0]);
-		playersInfo.add(dice, BorderLayout.CENTER);
 		for (Joueur j : game.getJoueurs()) {
 			JoueurIHM vue = new JoueurIHM(j);
 			vuesJoueurs.add(vue);
 			playersTable.add(vue);
 		}
-		playersInfo.add(playersTable, BorderLayout.NORTH);
-		playersInfo.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		playersInfo.add(playersTable, BorderLayout.CENTER);
+		
+		// Dice
+		if (game.onDiceMode())
+			playersInfo.add(de, BorderLayout.SOUTH);
+		if (game.onDiceMode())
+			dice.setIcon(des[0]);
+		playersInfo.add(dice, BorderLayout.SOUTH);
+		
 		jeu.add(playersInfo, BorderLayout.EAST);
+		
+		rafraichirBandeau();
 	}
 
 	/**
-	 * This function resets all the display of each JButton
+	 * This function resets all the JButton borders
 	 */
-	public void resetGame() {
+	public void rafraichirBordures() {
+		// Clean
+		for (int i = 0; i < getTaillePlateau(); ++i) {
+			for (int j = 0; j < getTaillePlateau(); ++j) {
+				this.plateauJPanel[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+			}
+		}
+		// Browse
 		for (int i = 0; i < getTaillePlateau(); ++i) {
 			for (int j = 0; j < getTaillePlateau(); ++j) {
 				this.plateauJPanel[i][j].setText("");
@@ -598,21 +507,36 @@ public class JeuIHM extends JFrame {
 						&& this.plateauIHM[i][j].getEntites().contains(
 								game.getPersonnageSelectionne())) {
 					this.plateauJPanel[i][j].setBorder(BorderFactory
-							.createLineBorder(Color.blue, 2));
+							.createLineBorder(game.getJoueurCourant().getCouleur(), 4));
 				} else {
-					this.plateauJPanel[i][j].setBorder(BorderFactory
-							.createLineBorder(Color.black, 2));
+					// Highlight dangerous squares
+					for (Dragon d : game.getDragons()) {
+						if (d.estEveille() && d.peutAtteindre(plateauIHM[i][j], game)) {
+							this.plateauJPanel[i][j].setBorder(BorderFactory.createLineBorder(Color.RED, 4));
+						}
+					}
 				}
-				// this.plateauJPanel[i][j].setBackground(Color.gray);
 			}
 		}
 
+	}
+	
+	/**
+	 * Start a new game
+	 */
+	public void recommencer() {
+		game.reinitialiser();
+		game.genererPlateauAleatoire();
+		rafraichirTout();
+		System.out.println(game.toString());
+		game.demarrerTour();
+		rafraichirTout();
 	}
 
 	/**
 	 * This function draw the updated data
 	 */
-	public void redrawGame() {
+	public void rafraichirPlateau() {
 		// updatePlateau();
 		JButton panCase;
 		cleanEmpty();
@@ -625,10 +549,22 @@ public class JeuIHM extends JFrame {
 					panCase.setBackground(entites.get(0).getColor());
 					for (Entite entite : entites) {
 						panCase.setIcon(entite.getMyPicture());
+						if (entite instanceof Dragon && game.getDragons().size() > 1) {
+							int numDrag = 1;
+							for (Dragon d : game.getDragons()) {
+								if (entite == d) {
+									panCase.setText(""+numDrag);
+								}
+								numDrag++;
+							}
+						}
 					}
 				}
+				else {
+					panCase.setBackground(Entite.COULEUR);
+				}
 				if (panCase == depart) {
-					panCase.setBackground(Color.pink);
+					panCase.setBackground(MAISON);
 				}
 			}
 		}
@@ -637,7 +573,7 @@ public class JeuIHM extends JFrame {
 	/**
 	 * This function is used in order to update the game directly on the display
 	 */
-	public void refresh() {
+	public void rafraichirTout() {
 		revalidate();
 		synchronized (game) {
 			if (game.getPersonnageSelectionne() != null
@@ -646,39 +582,36 @@ public class JeuIHM extends JFrame {
 					&& game.getPersonnageSelectionne().getDeplacementMax() != 0) {
 				game.finirTour();
 				hasRoll = false;
-				updateBandeau();
+				rafraichirBandeau();
 				revalidate();
 				game.demarrerTour();
 			}
-			resetGame();
-			redrawGame();
-			updateBandeau();
+			rafraichirBordures();
+			rafraichirPlateau();
+			rafraichirBandeau();
 			revalidate();
 			if (game.estTermine())
-				displayWinner();
+				afficherVainqueur();
 		}
 	}
 
 	/**
 	 * This function updates all the date of all players
 	 */
-	public void updateBandeau() {
-		selectionJ.setText(("Joueur: " + joueurNom[game
-				.getIndiceJoueurCourant()]));
-		if (game.getPersonnageSelectionne() == null)
-			selection.setText("Personnage: ");
-		if (game.getPersonnageSelectionne() instanceof Troll) {
-			selection.setText("Personnage: Troll");
-
-		}
-		if (game.getPersonnageSelectionne() instanceof Dragon)
-			selection.setText("Personnage: Dragon");
+	public void rafraichirBandeau() {
+		nbTurns.setText("<html><h1>Tour : " + game.getNumeroTour()+" / " + game.getNumeroTourMax() +"</h1></html>");
+		selectionJ.setText("<html><h2>Joueur : " + game.getJoueurCourant().getNom() + "</h2></html>");
+		scoreAAtteindre.setText("<html><h2>Score a atteindre : "+ game.getScoreVictoire() + "</h2></html>");
 		
 		for (JoueurIHM vue : vuesJoueurs) {
 			vue.redraw();
+			if (game.estEnTete(vue.getJoueur())) {
+				vue.setBackground(JOUEUR_EN_TETE);
+			}
+			else {
+				vue.setBackground(new JPanel().getBackground());
+			}
 		}
-		
-		this.nbTurns.setText("Tour : " + game.getNumeroTour());
 	}
 
 	/**
@@ -713,9 +646,28 @@ public class JeuIHM extends JFrame {
 	 * This function displays a little windows with a nice message for the
 	 * winner
 	 */
-	public void displayWinner() {
-		String msg = "<html><b>Joueur "+(game.getIndiceJoueurCourant()+1)
-					+" ("+game.getJoueurCourant().getNom()+")</b> gagne la partie !<br><br>";
+	public void afficherVainqueur() {
+		String msg = "";
+		
+		List<Joueur> vainqueurs = game.chercherVainqueurs();
+		// Draw game
+		if (vainqueurs.isEmpty() || vainqueurs.size() == Jeu.getNombreJoueurs()) {
+			msg = "<html><b>Match nul !</b><br><br>";
+		}
+		// There is at least one winner
+		else {
+			msg = "<html><b>";
+			msg += (vainqueurs.size() > 1?"Les joueurs ":"Le joueur ");
+			for (int i = 0; i < vainqueurs.size(); i++) {
+				if (i > 0 && i != vainqueurs.size() - 1) { msg += ", "; }
+				else if (i > 0 && i == vainqueurs.size() - 1) { msg += " et "; }
+				msg += (vainqueurs.get(i).getIndice() + 1) + " ("
+						+ vainqueurs.get(i).getNom() + ")";
+			}
+			msg += "</b> gagne"+(vainqueurs.size() > 1?"nt":"")+" la partie !<br><br>";
+		}
+		
+		// Scores
 		msg += "Scores : <br>";
 		for (int i = 0; i < game.getJoueurs().size(); i++) {
 			msg += " - Joueur "+(i+1)+" ("+game.getJoueurs().get(i).getNom()+") = "
@@ -730,12 +682,7 @@ public class JeuIHM extends JFrame {
 		
 		switch (n) {
 		case 1:
-			game.reinitialiser();
-			game.genererPlateauAleatoire();
-			refresh();
-			System.out.println(game.toString());
-			game.demarrerTour();
-			refresh();
+			recommencer();
 			break;
 		case 2:
 			System.exit(0);

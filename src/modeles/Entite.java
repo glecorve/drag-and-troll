@@ -30,7 +30,7 @@ public abstract class Entite {
 	/**
 	 * Color used to draw square backgrounds
 	 */
-	public static Color COLOR = new Color(153, 204, 153);
+	public static Color COULEUR = new Color(153, 204, 153);
 	
 	@Override
 	public abstract Object clone();
@@ -111,7 +111,7 @@ public abstract class Entite {
 	 * @return a color
 	 */
 	public Color getColor() {
-		return COLOR;
+		return COULEUR;
 	}
 
 	/**

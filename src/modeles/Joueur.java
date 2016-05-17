@@ -12,6 +12,7 @@ public class Joueur {
 	private static int value = 1;
 	private String nom = "Non defini";
 	private Troll troll = null;
+	private int indice;
 	private Color couleur;
 
 	private static final Color couleurs[] = {
@@ -32,22 +33,26 @@ public class Joueur {
 	public Joueur() {
 		setNom("Joueur " + (couleurIterateur == -1 ? "1" : "2"));
 		couleur = getCouleurSuivante();
+		indice = couleurIterateur;
 	}
 
 	public Joueur(String nom) {
 		setNom(nom);
 		couleur = getCouleurSuivante();
+		indice = couleurIterateur;
 	}
 	
 	public Joueur(Troll t) {
-		setNom("Joueur " + (couleurIterateur == -1 ? "1" : "2"));
+		setNom("Joueur " + (couleurIterateur + 2));
 		couleur = getCouleurSuivante();
+		indice = couleurIterateur;
 		troll = t;
 	}
 
 	public Joueur(String nom, Troll t) {
 		setNom(nom);
 		couleur = getCouleurSuivante();
+		indice = couleurIterateur;
 		troll = t;
 	}
 
@@ -59,6 +64,7 @@ public class Joueur {
 	public Joueur clone() {
 		Joueur clone = new Joueur(this.nom, (Troll) this.troll.clone());
 		clone.couleur = this.couleur;
+		clone.indice = this.indice;
 		return clone;
 	}
 	
@@ -128,6 +134,23 @@ public class Joueur {
 	 */
 	public Color getCouleur() {
 		return couleur;
+	}
+	
+	/**
+	 * Get the index of the player
+	 */
+	public int getIndice() {
+		return indice;
+	}
+	
+	/**
+	 * Set the color of the current player
+	 * @param i Index of the color in the array of colors
+	 */
+	public void setIndice(int i) {
+		couleurIterateur = i - 1;
+		couleur = getCouleurSuivante();
+		indice = couleurIterateur;
 	}
 
 	/**

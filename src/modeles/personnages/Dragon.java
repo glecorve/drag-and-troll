@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 import controle.Jeu;
 
 import modeles.Case;
+import modeles.obstacles.Rocher;
 
 
 /**
@@ -21,12 +22,12 @@ public class Dragon extends Personnage {
 	/**
 	 * Maximum number of moves for any dragon
 	 */
-	private static final int DEPLACEMENT_MAX_DRAGON = 2;
+	private static final int DEPLACEMENT_MAX_DRAGON = 3;
 	
 	/**
 	 * Number of rounds during which the dragon remains awaken
 	 */
-	private static final int DUREE_EVEIL = 10;
+	private static final int DUREE_EVEIL = 15;
 	
 	/**
 	 * Number of rounds during which the dragon remains awaken
@@ -106,17 +107,68 @@ public class Dragon extends Personnage {
 	/**
 	 * Test if the fire of the current dragon can reach a give board square
 	 * @param cible The target board square
+	 * @param jeu The game to be inspected
 	 * @return True if the dragon can fire onto the position
 	 */
-	public boolean peutAtteindre(Case cible) {
+	public boolean peutAtteindre(Case cible, Jeu jeu) {
+		// Same X coordinate
 		if (position.getAbscisse() == cible.getAbscisse()) {
 			int distance = Math.abs(position.getOrdonnee() - cible.getOrdonnee());
-			return (distance > 0 && distance <= Dragon.PORTEE_FEU);
+			boolean atteignable = (distance > 0 && distance <= Dragon.PORTEE_FEU);
+			// Look at the bottom
+			if (position.getOrdonnee() < cible.getOrdonnee()) {
+				for (int i = position.getOrdonnee() + 1; atteignable
+						&& i <= cible.getOrdonnee(); i++) {
+					Case c = jeu.getCase(position.getAbscisse(), i);
+					if (!c.getEntites().isEmpty()
+							&& (c.getPremiereEntite() instanceof Rocher)) {
+						atteignable = false;
+					}
+				}
+			}
+			// Look on top
+			else {
+				for (int i = position.getOrdonnee() - 1; atteignable
+						&& i >= cible.getOrdonnee() ; i--) {
+					Case c = jeu.getCase(position.getAbscisse(), i);
+					if (!c.getEntites().isEmpty()
+							&& (c.getPremiereEntite() instanceof Rocher)) {
+						atteignable = false;
+					}
+				}
+			}
+			return atteignable;
 		}
+		// Same Y coordinate
 		else if (position.getOrdonnee() == cible.getOrdonnee()) {
-			int distance = Math.abs(position.getAbscisse() - cible.getAbscisse());
-			return (distance > 0 && distance <= Dragon.PORTEE_FEU);
+			int distance = Math.abs(position.getAbscisse()
+					- cible.getAbscisse());
+			boolean atteignable = (distance > 0 && distance <= Dragon.PORTEE_FEU);
+			// Look on the right
+			if (position.getOrdonnee() < cible.getOrdonnee()) {
+				for (int i = position.getAbscisse() + 1; atteignable
+						&& i <= cible.getAbscisse(); i++) {
+					Case c = jeu.getCase(i, position.getOrdonnee());
+					if (!c.getEntites().isEmpty()
+							&& (c.getPremiereEntite() instanceof Rocher)) {
+						atteignable = false;
+					}
+				}
+			}
+			// Look on the left
+			else {
+				for (int i = position.getAbscisse() - 1; atteignable
+						&& i >= cible.getAbscisse(); i--) {
+					Case c = jeu.getCase(i, position.getOrdonnee());
+					if (!c.getEntites().isEmpty()
+							&& (c.getPremiereEntite() instanceof Rocher)) {
+						atteignable = false;
+					}
+				}
+			}
+			return atteignable;
 		}
+		// Otherwise
 		else {
 			return false;
 		}
@@ -186,7 +238,7 @@ public class Dragon extends Personnage {
 	 */
     @Override
 	public String toString() {
-		return "Dragon [id="+id+", etat=" + etat + "]";
+		return "Dragon [id="+id+", etat=" + etat +", prevPros=" + previousPosition + "]";
 	}
 
 	
@@ -230,7 +282,9 @@ public class Dragon extends Personnage {
 	 * Move action redefined because the dragon can only move if it's in an awaken state.
 	 */
 	public void deplacer(Case newCase) {
-		this.etat.deplacer(newCase, this);
+		if (estEveille()) {
+			super.deplacer(newCase);
+		}
 	}
 	
 	/**
