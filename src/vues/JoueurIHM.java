@@ -17,6 +17,8 @@ import modeles.personnages.Troll;
 
 public class JoueurIHM extends JPanel {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Joueur joueur;
 	
 	public JoueurIHM(Joueur j) {

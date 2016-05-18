@@ -42,13 +42,15 @@ public class IAThread extends Thread {
      * @param executor Service d'execution du thread
      */
     public IAThread(AbstractIA ia, Jeu jeu, ExecutorService executor) {
+    	super("Calcul");
+    	setName("Calcul");
         this.ia = ia;
         this.jeu = jeu;
         this.executor = executor;
         this.actionChoisie = null;
     }
     
-    public Action getCoupChoisi() {
+    public Action getActionChoisie() {
         return actionChoisie;
     }
 
@@ -59,15 +61,12 @@ public class IAThread extends Thread {
     public void run() {
         try {
         	actionChoisie = ia.choisirAction((Jeu) jeu.clone());
-//            System.out.println(Thread.currentThread().getName()+": "+"Coup memorise");
         }
         catch (Exception ex) {
             Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null, ex);
-//            System.out.println(Thread.currentThread().getName()+": "+"Interrompu");
         }
         finally {
-            executor.shutdown();
-//            System.out.println(Thread.currentThread().getName()+": "+"Fin de l'executor");
+           executor.shutdownNow();
         }
     }
 

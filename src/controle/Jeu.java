@@ -647,7 +647,6 @@ public class Jeu {
 			t = new Troll(this.trollIcon[i], this.trollIcon[4 + i]);
 			t.setJoueur(i);
 			t.setScore(i);
-			t.augmenterMagie(1);
 			joueurs.get(i).setTroll(t);
 			this.scoreMax += i;
 			this.ajouterEntite(t, currentX, currentY);
@@ -952,11 +951,13 @@ public class Jeu {
 			return true;
 		}
 		else if (a instanceof DeplacerTroll) {
-			return deplacementValide(((DeplacerTroll) a).getPersonnage(), ((DeplacerTroll) a).getDestination());
+			Troll t = chercherTroll(((DeplacerTroll) a).getPersonnage().getId());
+			return deplacementValide(t, ((DeplacerTroll) a).getDestination());
 		}
 		else if (a instanceof ReveillerDeplacerDragon) {
-			return peutReveillerDragon(getJoueurCourant(), (Dragon) ((ReveillerDeplacerDragon) a).getPersonnage())
-					&& deplacementValide(((DeplacerPersonnage) a).getPersonnage(), ((DeplacerPersonnage) a).getDestination());
+			Dragon d = chercherDragon(((ReveillerDeplacerDragon) a).getPersonnage().getId());
+			return peutReveillerDragon(getJoueurCourant(), d)
+					&& deplacementValide(d, ((DeplacerPersonnage) a).getDestination());
 		}
 		else {
 			return false;
@@ -977,80 +978,78 @@ public class Jeu {
 	/**
      * Play the move of an AI player
      */
-    public synchronized void jouerIA() {
-        if (getJoueurCourant() instanceof AbstractIA) {
-            synchronized(this) {
-//                System.out.println(Thread.currentThread().getName()+": "+"================================[ " + getJoueurCourant().getClass().toString() + " " + getJoueurCourant().getNom() + " ]==========================================");
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                AbstractIA ia = (AbstractIA) getJoueurCourant();
-                IAThread calcul = new IAThread(ia, this, executor);
-                executor.execute(calcul);
-                try {
-                    if (!executor.awaitTermination(AbstractIA.DELAI_DE_REFLEXION, TimeUnit.MILLISECONDS))
-                    {
-                        // Forcer la fin du thread du joueur artificiel
-                        executor.shutdownNow();
-                    }
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                try {
-                    calcul.join();
-                } catch (InterruptedException ex) {
-                	Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null, ex);
-                }
+	@SuppressWarnings("deprecation")
+	public synchronized void jouerIA() {
+		if (getJoueurCourant() instanceof AbstractIA) {
+			System.out.println();
+			System.out.println("================================[ "
+					+ getJoueurCourant().getClass().toString() + " "
+					+ getJoueurCourant().getNom()
+					+ " ]==========================================");
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			AbstractIA ia = (AbstractIA) getJoueurCourant();
+			IAThread calcul = new IAThread(ia, this, executor);
+			executor.execute(calcul);
+			try {
+				if (!executor.awaitTermination(AbstractIA.DELAI_DE_REFLEXION,
+						TimeUnit.MILLISECONDS)) {
+					executor.shutdownNow();
+				}
+			} catch (InterruptedException ex) {
+				Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null,
+						ex);
+			}
+			try {
+					calcul.join();
+			} catch (InterruptedException ex) {
+				Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null,
+						ex);
+			}
 
-                while (calcul.isAlive()) {
-//                    calcul.stop();
-                }
-                System.gc();
-                Action action;
-                // Si aucun coup n'a ete retourne, prendre le dernier coup memorise
-                if (calcul.getCoupChoisi() == null) {
-//                    System.out.println(Thread.currentThread().getName()+": "+"Aucun coup choisi");
-                	action = ia.getActionMemorisee();
-                }
-                else {
-//                    System.out.println(Thread.currentThread().getName()+": "+"coup choisi = " + calcul.getCoupChoisi());
-                	action = calcul.getCoupChoisi();
-                }
-                // Si aucun coup memorise, prendre un coup au hasard
-                while (!actionValide(ia, action)) {
-                    System.out.println(Thread.currentThread().getName()+": "+"Aucun coup memorise");
-                    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    System.out.println("!!!!!!!!!!!!!!!! HASARD !!!!!!!!!!!!!!!!");
-                    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    action = (new IAAleatoire()).choisirAction(this);
-//                    System.out.println("Nouveau coup calcule = " + coup);
-                }
+			
+			Action action;
+			// Si aucun coup n'a ete retourne, prendre le dernier coup memorise
+			if (calcul.getActionChoisie() == null
+					&& ia.getActionMemorisee() == null) {
+				System.out.println(Thread.currentThread().getName() + ": "
+						+ "Aucune action choisie, aucune action memorisee");
+				System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				System.out.println("!!!!!!!!!!!!!!!! HASARD !!!!!!!!!!!!!!!!");
+				System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				action = (new IAAleatoire()).choisirAction(this);
+			} else if (calcul.getActionChoisie() == null
+					&& ia.getActionMemorisee() != null) {
+				System.out.println(Thread.currentThread().getName() + ": "
+						+ "Aucune action choisie mais action memorisee");
+				action = ia.getActionMemorisee();
+			} else {
+				action = calcul.getActionChoisie();
+			}
+			while (!actionValide(ia, action)) {
+				System.out.println(Thread.currentThread().getName() + ": "
+						+ "Action non valide");
+				System.exit(0);
+				action = (new IAAleatoire()).choisirAction(this);
+			}
+			System.out.println("Action jouee = " + action);
+			action.appliquer(this);
+			
+			// Kill remaining IAThread threads
+			for (Thread t : Thread.getAllStackTraces().keySet()) {
+				for (StackTraceElement ste : t.getStackTrace()) {
+					if (ste.getClassName().equals("ia.IAThread")) {
+						t.stop();
+					}
+				}
+			}
 
-//                System.out.println("Coup choisi = "+action.toString());
-
-                try {
-                    action.appliquer(this);
-                }
-                catch (NullPointerException e) {
-                	action = (new IAAleatoire()).choisirAction(this);
-                    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    System.out.println("!!!!!!!!!!!!!!!! HASARD !!!!!!!!!!!!!!!!");
-                    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    action.appliquer(this);
-                }
-
-                JeuIHM.getInstance().revalidate();
-                try {
-                    Thread.sleep(10);
-//                    Thread.sleep(400);
-                } catch (InterruptedException ex) {
-                }
-
-//                System.out.println("Fin de tour");
-//                for (Joueur j : this.joueurs) {
-//                    System.out.println(j.toString());
-//                }
-            }
-        }
-    }
+			JeuIHM.getInstance().revalidate();
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException ex) {
+			}
+		}
+	}
 
 	/**
 	 * This function will be used when a turn ends. It's also where the game's

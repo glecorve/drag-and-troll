@@ -3,7 +3,6 @@ package ia;
 import controle.Jeu;
 import modeles.Joueur;
 import modeles.actions.Action;
-import modeles.personnages.Troll;
 
 /**
  *
@@ -14,7 +13,7 @@ public abstract class AbstractIA extends Joueur {
     /**
      * Delai de reflexion (c.-a-d. de calcul) autorise pour tous les joueurs artificiels
      */
-    public static int DELAI_DE_REFLEXION = 4000;
+    public static int DELAI_DE_REFLEXION = 2000;
 
     private Action actionMemorisee;
 

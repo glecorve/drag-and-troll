@@ -75,7 +75,6 @@ public abstract class Personnage extends Entite {
 	 * on an Obstacle.
 	 */
 	public void revenirEnArriere() {
-		System.out.println("Back to "+previousPosition);
 		this.position.supprimerEntite(this);
 		this.previousPosition.ajouterEntite(this);
 		this.position = this.previousPosition;

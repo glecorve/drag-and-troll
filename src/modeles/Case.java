@@ -147,6 +147,20 @@ public class Case {
 	public int getOrdonnee() {
 		return this.ordonnee;
 	}
+	
+	/**
+	 * Computes the amount of gold on the current square
+	 * @return A positive or null integer
+	 */
+	public int getMontantPresent() {
+		int montant = 0;
+		for (Entite e : entites) {
+			if (e instanceof Piece || e instanceof Bourse) {
+				montant += ((Objet) e).getBonus();
+			}
+		}
+		return montant;
+	}
 
 
 	/** 

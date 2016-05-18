@@ -2,7 +2,6 @@ package modeles.actions;
 
 import modeles.Case;
 import modeles.personnages.Personnage;
-import controle.Jeu;
 
 /**
  * Classe qui modelise un deplacement d'un troll

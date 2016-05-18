@@ -145,7 +145,7 @@ public class Dragon extends Personnage {
 					- cible.getAbscisse());
 			boolean atteignable = (distance > 0 && distance <= Dragon.PORTEE_FEU);
 			// Look on the right
-			if (position.getOrdonnee() < cible.getOrdonnee()) {
+			if (position.getAbscisse() < cible.getAbscisse()) {
 				for (int i = position.getAbscisse() + 1; atteignable
 						&& i <= cible.getAbscisse(); i++) {
 					Case c = jeu.getCase(i, position.getOrdonnee());

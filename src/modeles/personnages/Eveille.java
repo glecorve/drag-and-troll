@@ -3,8 +3,6 @@
  */
 package modeles.personnages;
 
-import modeles.Case;
-
 /**
  * This is the awaken state of the dragon
  * @author brahim, prukev

@@ -1,7 +1,5 @@
 package modeles.personnages;
 
-import modeles.Case;
-
 /**
  * This is the sleeping state of the dragon
  * @author brahim, prukev

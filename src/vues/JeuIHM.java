@@ -5,8 +5,6 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
-import javafx.scene.layout.Border;
-
 import javax.swing.*;
 
 import controle.Jeu;
@@ -15,9 +13,9 @@ import modeles.Case;
 import modeles.Entite;
 import modeles.Joueur;
 import modeles.personnages.Dragon;
-import modeles.personnages.Eveille;
 import modeles.personnages.Personnage;
 import modeles.personnages.Troll;
+import ia.AbstractIA;
 
 import images.Images;
 
@@ -101,11 +99,6 @@ public class JeuIHM extends JFrame {
 	private java.util.List<JoueurIHM> vuesJoueurs = new LinkedList<JoueurIHM>();
 
 	private JPanel playersTable = new JPanel();
-
-	/**
-	 * Name of first column for players data
-	 */
-	private String[] dataList = { "Nom", "Score", "Lifes", "Magic", "Shield" };
 
 	/**
 	 * Troll's home
@@ -235,6 +228,9 @@ public class JeuIHM extends JFrame {
 			for (int j = 0; j < getTaillePlateau(); ++j) {
 				final Case actualC = plateauIHM[i][j];
 				final JButton panCase = new JButton();
+				if (actualC == game.getMaison()) {
+					depart = panCase;
+				}
 				
 				panCase.addKeyListener(new KeyListener() {
 
@@ -250,52 +246,57 @@ public class JeuIHM extends JFrame {
 					// character
 					@Override
 					public void keyPressed(KeyEvent e) {
-						// This will only works if a character is selected
-						if (game.getPersonnageSelectionne() != null) {
-							Personnage personnageCourant = game
-									.getPersonnageSelectionne();
-							Case positionC = personnageCourant.getPosition();
-							if (e.getKeyCode() == KeyEvent.VK_UP
-									&& positionC.getAbscisse() > 0) {
-								game.deplacer(plateauIHM[positionC
-										.getAbscisse() - 1][positionC
-										.getOrdonnee()]);
-							}
+						if (!(game.getJoueurCourant() instanceof AbstractIA)) {
+							// This will only works if a character is selected
+							if (game.getPersonnageSelectionne() != null) {
+								Personnage personnageCourant = game
+										.getPersonnageSelectionne();
+								Case positionC = personnageCourant
+										.getPosition();
+								if (e.getKeyCode() == KeyEvent.VK_UP
+										&& positionC.getAbscisse() > 0) {
+									game.deplacer(plateauIHM[positionC
+											.getAbscisse() - 1][positionC
+											.getOrdonnee()]);
+								}
 
-							if (e.getKeyCode() == KeyEvent.VK_DOWN
-									&& positionC.getAbscisse() < getTaillePlateau() - 1) {
-								game.deplacer(plateauIHM[positionC
-										.getAbscisse() + 1][positionC
-										.getOrdonnee()]);
-							}
+								if (e.getKeyCode() == KeyEvent.VK_DOWN
+										&& positionC.getAbscisse() < getTaillePlateau() - 1) {
+									game.deplacer(plateauIHM[positionC
+											.getAbscisse() + 1][positionC
+											.getOrdonnee()]);
+								}
 
-							if (e.getKeyCode() == KeyEvent.VK_LEFT
-									&& positionC.getOrdonnee() > 0) {
-								game.deplacer(plateauIHM[positionC
-										.getAbscisse()][positionC.getOrdonnee() - 1]);
-							}
+								if (e.getKeyCode() == KeyEvent.VK_LEFT
+										&& positionC.getOrdonnee() > 0) {
+									game.deplacer(plateauIHM[positionC
+											.getAbscisse()][positionC
+											.getOrdonnee() - 1]);
+								}
 
-							if (e.getKeyCode() == KeyEvent.VK_RIGHT
-									&& positionC.getOrdonnee() < getTaillePlateau() - 1) {
-								game.deplacer(plateauIHM[positionC
-										.getAbscisse()][positionC.getOrdonnee() + 1]);
+								if (e.getKeyCode() == KeyEvent.VK_RIGHT
+										&& positionC.getOrdonnee() < getTaillePlateau() - 1) {
+									game.deplacer(plateauIHM[positionC
+											.getAbscisse()][positionC
+											.getOrdonnee() + 1]);
 
-							}
-							
-							if (e.getKeyChar() == '1') {
-								essayerJouerDragon(1);
-							}
-							
-							if (e.getKeyChar() == '2') {
-								essayerJouerDragon(2);
-							}
-							
-							if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-								game.finirTour();
-								game.demarrerTour();
-							}		
+								}
 
-							rafraichirTout();
+								if (e.getKeyChar() == '1') {
+									essayerJouerDragon(1);
+								}
+
+								if (e.getKeyChar() == '2') {
+									essayerJouerDragon(2);
+								}
+
+								if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+									game.finirTour();
+									game.demarrerTour();
+								}
+
+								rafraichirTout();
+							}
 						}
 
 					}
@@ -453,7 +454,6 @@ public class JeuIHM extends JFrame {
 	/**
 	 * This function draws the data of all the players
 	 */
-	@SuppressWarnings("static-access")
 	public void drawBandeau() {
 
 		playersInfo.setLayout(new BorderLayout());
@@ -527,9 +527,9 @@ public class JeuIHM extends JFrame {
 	public void recommencer() {
 		game.reinitialiser();
 		game.genererPlateauAleatoire();
-		rafraichirTout();
-		System.out.println(game.toString());
-		game.demarrerTour();
+//		rafraichirTout();
+//		System.out.println(game.toString());
+//		game.demarrerTour();
 		rafraichirTout();
 	}
 
@@ -573,25 +573,35 @@ public class JeuIHM extends JFrame {
 	/**
 	 * This function is used in order to update the game directly on the display
 	 */
-	public void rafraichirTout() {
+	public synchronized void rafraichirTout() {
+		
+		boolean finTour = (game.getPersonnageSelectionne() != null
+				&& game.getPersonnageSelectionne()
+						.getDeplacementActuel() == game
+						.getPersonnageSelectionne().getDeplacementMax()
+				&& game.getPersonnageSelectionne().getDeplacementMax() != 0);
+		
+		if (finTour) {
+			game.finirTour();
+			System.out.println("fin tour");
+			hasRoll = false;
+		}
+		
+		rafraichirBordures();
+		rafraichirPlateau();
+		rafraichirBandeau();
 		revalidate();
-		synchronized (game) {
-			if (game.getPersonnageSelectionne() != null
-					&& game.getPersonnageSelectionne().getDeplacementActuel() == game
-							.getPersonnageSelectionne().getDeplacementMax()
-					&& game.getPersonnageSelectionne().getDeplacementMax() != 0) {
-				game.finirTour();
-				hasRoll = false;
-				rafraichirBandeau();
-				revalidate();
-				game.demarrerTour();
-			}
-			rafraichirBordures();
-			rafraichirPlateau();
-			rafraichirBandeau();
-			revalidate();
-			if (game.estTermine())
-				afficherVainqueur();
+
+		if (game.estTermine()) {
+			afficherVainqueur();
+		}
+		
+		if (finTour) {
+			new Thread() {
+				public void run() {
+					game.demarrerTour();
+				}
+			}.start();
 		}
 	}
 
@@ -675,19 +685,21 @@ public class JeuIHM extends JFrame {
 					+" point"+(game.getJoueurs().get(i).getScore()>1?"s":"")+"<br>";
 		}
 		msg += "</html>";
-		Object[] options = { "Revoir le plateau", "Rejouer une partie", "Quitter" };
+		
+		System.out.println();
+		System.out.println(msg);
+		
+		Object[] options = { "Rejouer une partie", "Quitter" };
 		int n = JOptionPane.showOptionDialog(this,
 				msg, "FIN DE PARTIE",
-				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[2]);
+				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[1]);
 		
 		switch (n) {
-		case 1:
+		case 0:
 			recommencer();
 			break;
-		case 2:
-			System.exit(0);
-			break;
 		default:
+			System.exit(0);
 			break;
 		}
 		
